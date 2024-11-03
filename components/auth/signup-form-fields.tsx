@@ -1,16 +1,15 @@
 "use client"
 
-import { PasswordInput } from "@/components/form/password-input"
-import { TextInput } from "@/components/form/text-input"
-import { Control } from "react-hook-form"
+import { PasswordInput } from "../form/password-input"
+import { useFormContext } from "react-hook-form"
+import { TextInput } from "../form/text-input"
 
-interface SignUpFormFieldsProps {
-    control?: Control<any>
-}
+export function SignUpFormFields({ token }: { token: string }) {
+    const { control } = useFormContext()
 
-export function SignUpFormFields({ control }: SignUpFormFieldsProps) {
     return (
         <div className="grid gap-4">
+            <input type="hidden" name="token" value={token} />
             <TextInput
                 control={control!}
                 name="email"

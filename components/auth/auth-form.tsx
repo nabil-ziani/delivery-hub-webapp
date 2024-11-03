@@ -1,6 +1,6 @@
 "use client"
 
-import { cloneElement, ReactElement, ReactNode } from 'react'
+import { ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -22,8 +22,14 @@ const AuthForm = ({ children, action, schemaKey, submitText }: AuthFormProps) =>
     const router = useRouter()
 
     const schema = schemas[schemaKey]
+    const defaultValues = Object.keys(schema instanceof z.ZodEffects ? schema._def.schema.shape : schema.shape).reduce((acc, key) => ({
+        ...acc,
+        [key]: ''
+    }), {})
+
     const form = useForm<z.infer<typeof schema>>({
-        resolver: zodResolver(schema)
+        resolver: zodResolver(schema),
+        defaultValues
     })
 
     const onSubmit = async (data: z.infer<typeof schema>) => {
@@ -68,7 +74,7 @@ const AuthForm = ({ children, action, schemaKey, submitText }: AuthFormProps) =>
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {cloneElement(children as ReactElement, { control: form.control })}
+                {children}
                 <SubmitButton pendingText="Loading...">
                     {submitText}
                 </SubmitButton>

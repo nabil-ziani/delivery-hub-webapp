@@ -1,12 +1,13 @@
 "use server"
 
 import { createClient } from "@/utils/supabase/server";
+import { randomUUID } from "crypto";
 
 export const generateAdminInvite = async (email: string) => {
     const supabase = await createClient();
 
     // Create organization placeholder with a name
-    const { data: org } = await supabase
+    const { data: org, error: orgError } = await supabase
         .from('organizations')
         .insert({
             name: `Restaurant - ${new Date().toISOString()}` // Temporary name until onboarding
@@ -14,14 +15,19 @@ export const generateAdminInvite = async (email: string) => {
         .select()
         .single();
 
-    if (!org) {
+
+    if (orgError || !org) {
+        console.error('Organization creation error:', orgError);
         throw new Error('Failed to create organization');
     }
 
+    const token = randomUUID();
+
     // Generate invite token
-    const { data: invite } = await supabase
+    const { data: invite, error: inviteError } = await supabase
         .from('invite_tokens')
         .insert({
+            token,
             organization_id: org.id,
             role: 'admin',
             email,
@@ -30,12 +36,13 @@ export const generateAdminInvite = async (email: string) => {
         .select()
         .single();
 
-    if (!invite) {
+    if (inviteError || !invite) {
+        console.error('Invite creation error:', inviteError);
         throw new Error('Failed to create invite');
     }
 
     const inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/sign-up?token=${invite.token}`;
-    
+
     // In production, send this via email
     return inviteUrl;
 } 

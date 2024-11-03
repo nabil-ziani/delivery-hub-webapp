@@ -1,4 +1,5 @@
-import Link from "next/link"
+"use server"
+
 import Image from "next/image"
 
 import { signUpAction } from "@/app/actions"
@@ -8,18 +9,19 @@ import AuthForm from "@/components/auth/auth-form"
 import { FormMessage, Message } from "@/components/form/form-message"
 
 export default async function SignUpPage({ searchParams }: { searchParams: { token?: string; message?: string } & Message }) {
+  const { message, token } = await searchParams
 
   // Show error message if present
-  if (searchParams.message) {
+  if (message) {
     return (
       <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
-        <FormMessage message={{ error: searchParams.message }} />
+        <FormMessage message={{ error: message }} />
       </div>
     )
   }
 
   // If no token is provided, show access denied
-  if (!searchParams.token) {
+  if (!token) {
     return (
       <div className="flex h-screen w-screen flex-col justify-center space-y-6 sm:w-[350px] mx-auto">
         <div className="flex flex-col space-y-2 text-center">
@@ -48,13 +50,12 @@ export default async function SignUpPage({ searchParams }: { searchParams: { tok
           Create an account
         </h1>
         <p className="text-sm text-muted-foreground">
-          Enter your details to create your account
+          Enter your details to create an account
         </p>
       </div>
 
       <AuthForm action={signUpAction} schemaKey="signUp" submitText="Sign up">
-        <input type="hidden" name="token" value={searchParams.token} />
-        <SignUpFormFields />
+        <SignUpFormFields token={token} />
       </AuthForm>
     </div>
   )

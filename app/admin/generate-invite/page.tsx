@@ -6,6 +6,7 @@ export default function GenerateInvitePage() {
         const email = formData.get('email') as string;
         const inviteLink = await generateAdminInvite(email);
         // In production, you would send this link via email
+        console.log(inviteLink);
         return inviteLink;
     }
 
