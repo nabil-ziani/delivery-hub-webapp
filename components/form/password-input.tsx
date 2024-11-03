@@ -3,11 +3,11 @@
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
-import { Button } from "./ui/button"
+import { Button } from "../ui/button"
 import { Control } from "react-hook-form"
-import { FormField, FormMessage } from "./ui/form"
-import { FormItem } from "./ui/form"
-import { FormLabel } from "./ui/form"
+import { FormField, FormMessage } from "../ui/form"
+import { FormItem } from "../ui/form"
+import { FormLabel } from "../ui/form"
 
 interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     error?: string

@@ -1,12 +1,25 @@
 "use server"
 
-import AuthForm from "@/components/auth-form"
-import { signInAction } from "@/app/actions"
 import Link from "next/link"
 import Image from "next/image"
-import { SignInFormFields } from "@/components/signin-fields"
 
-export default async function SignInPage() {
+import { signInAction } from "@/app/actions"
+import { SignInFormFields } from "@/components/auth/signin-form-fields"
+
+import AuthForm from "@/components/auth/auth-form"
+import { FormMessage, Message } from "@/components/form/form-message"
+
+export default async function SignInPage({ searchParams }: { searchParams: Promise<Message> }) {
+  const message = await searchParams
+
+  if ("message" in message) {
+    return (
+      <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
+        <FormMessage message={message} />
+      </div>
+    )
+  }
+
   return (
     <div className="flex h-screen w-screen flex-col justify-center space-y-6 sm:w-[350px] mx-auto">
       <div className="flex flex-col space-y-2 text-center">
@@ -24,6 +37,7 @@ export default async function SignInPage() {
           Enter your credentials to sign in
         </p>
       </div>
+
       <AuthForm action={signInAction} schemaKey="signIn" submitText="Sign in">
         <SignInFormFields />
       </AuthForm>

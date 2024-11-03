@@ -1,8 +1,8 @@
 "use client"
 
-import { PasswordInput } from "@/components/password-input"
+import { PasswordInput } from "../form/password-input"
 import { useFormContext } from "react-hook-form"
-import { TextInput } from "./text-input"
+import { TextInput } from "../form/text-input"
 
 export function SignInFormFields() {
     const { control } = useFormContext()

@@ -1,3 +1,5 @@
+"use server"
+
 import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
@@ -61,8 +63,6 @@ export const signUpAction = async (formData: FormData) => {
 };
 
 export const signInAction = async (formData: FormData) => {
-  "use server"
-
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const supabase = await createClient();
@@ -120,7 +120,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   const confirmPassword = formData.get("confirmPassword") as string;
 
   if (!password || !confirmPassword) {
-    encodedRedirect(
+    return encodedRedirect(
       "error",
       "/reset-password",
       "Password and confirm password are required",
@@ -128,7 +128,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   }
 
   if (password !== confirmPassword) {
-    encodedRedirect(
+    return encodedRedirect(
       "error",
       "/reset-password",
       "Passwords do not match",
@@ -140,14 +140,18 @@ export const resetPasswordAction = async (formData: FormData) => {
   });
 
   if (error) {
-    encodedRedirect(
+    return encodedRedirect(
       "error",
       "/reset-password",
       "Password update failed",
     );
   }
 
-  encodedRedirect("success", "/reset-password", "Password updated");
+  return encodedRedirect(
+    "success",
+    "/reset-password",
+    "Password updated successfully"
+  );
 };
 
 export const signOutAction = async () => {

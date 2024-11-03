@@ -1,23 +1,23 @@
 "use client"
 
 import { cloneElement, ReactElement, ReactNode } from 'react'
-import { useForm, UseFormReturn } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from 'next/navigation'
-import { Form } from './ui/form'
+import { Form } from '../ui/form'
 import { schemas } from '@/lib/validations/auth'
-import { SubmitButton } from './submit-button'
+import { SubmitButton } from '../form/submit-button'
 
-interface AuthFormProps<T extends z.ZodType> {
+interface AuthFormProps {
     schemaKey: keyof typeof schemas
     action: (formData: FormData) => Promise<Response | { error: string } | { redirect: string }>
     submitText: string
     children: ReactNode
 }
 
-const AuthForm = <T extends z.ZodType>({ children, action, schemaKey, submitText }: AuthFormProps<T>) => {
+const AuthForm = ({ children, action, schemaKey, submitText }: AuthFormProps) => {
     const { toast } = useToast()
     const router = useRouter()
 
@@ -28,6 +28,7 @@ const AuthForm = <T extends z.ZodType>({ children, action, schemaKey, submitText
 
     const onSubmit = async (data: z.infer<typeof schema>) => {
         const formData = new FormData()
+
         Object.entries(data).forEach(([key, value]) => {
             formData.append(key, value as string)
         })

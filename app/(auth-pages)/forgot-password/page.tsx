@@ -1,34 +1,52 @@
-import { forgotPasswordAction } from "@/app/actions"
-import { FormMessage, Message } from "@/components/form-message"
-import { SubmitButton } from "@/components/submit-button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import Image from "next/image"
 
-export default async function ForgotPassword(props: { searchParams: Promise<Message> }) {
-  const searchParams = await props.searchParams
+import { forgotPasswordAction } from "@/app/actions"
+import { ForgotPasswordFields } from "@/components/auth/forgot-password-fields"
+import AuthForm from "@/components/auth/auth-form"
+import { FormMessage, Message } from "@/components/form/form-message"
+
+export default async function ForgotPasswordPage({ searchParams }: { searchParams: Promise<Message> }) {
+  const message = await searchParams
+
+  if ("message" in message) {
+    return (
+      <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
+        <FormMessage message={message} />
+      </div>
+    )
+  }
 
   return (
-    <>
-      <form className="flex-1 flex flex-col w-full gap-2 text-foreground [&>input]:mb-6 min-w-64 max-w-64 mx-auto">
-        <div>
-          <h1 className="text-2xl font-medium">Reset Password</h1>
-          <p className="text-sm text-secondary-foreground">
-            Already have an account?{" "}
-            <Link className="text-primary underline" href="/sign-in">
-              Sign in
-            </Link>
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-          <Label htmlFor="email">Email</Label>
-          <Input name="email" placeholder="you@example.com" required />
-          <SubmitButton formAction={forgotPasswordAction}>
-            Reset Password
-          </SubmitButton>
-          <FormMessage message={searchParams} />
-        </div>
-      </form>
-    </>
+    <div className="flex h-screen w-screen flex-col justify-center space-y-6 sm:w-[350px] mx-auto">
+      <div className="flex flex-col space-y-2 text-center">
+        <Image
+          src="/logo.png"
+          width={50}
+          height={50}
+          alt="Logo"
+          className="mx-auto"
+        />
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Reset Password
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Enter your email to reset your password
+        </p>
+      </div>
+
+      <AuthForm action={forgotPasswordAction} schemaKey="resetPassword" submitText="Send Reset Link">
+        <ForgotPasswordFields />
+      </AuthForm>
+
+      <FormMessage message={message} />
+
+      <p className="px-8 text-center text-sm text-muted-foreground">
+        Remember your password?{" "}
+        <Link href="/sign-in" className="hover:text-brand underline underline-offset-4">
+          Sign in
+        </Link>
+      </p>
+    </div>
   )
 }

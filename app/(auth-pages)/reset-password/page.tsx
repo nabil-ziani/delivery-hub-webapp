@@ -1,36 +1,44 @@
-import { resetPasswordAction } from "@/app/actions"
-import { FormMessage, Message } from "@/components/form-message"
-import { SubmitButton } from "@/components/submit-button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import Image from "next/image"
 
-export default async function ResetPassword(props: { searchParams: Promise<Message> }) {
-  const searchParams = await props.searchParams
+import { resetPasswordAction } from "@/app/actions"
+import { ResetPasswordFields } from "@/components/auth/reset-password-fields"
+import AuthForm from "@/components/auth/auth-form"
+import { FormMessage, Message } from "@/components/form/form-message"
+
+export default async function ResetPasswordPage({ searchParams }: { searchParams: Promise<Message> }) {
+  const message = await searchParams
+
+  if ("message" in message) {
+    return (
+      <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
+        <FormMessage message={message} />
+      </div>
+    )
+  }
 
   return (
-    <form className="flex flex-col w-full max-w-md p-4 gap-2 [&>input]:mb-4">
-      <h1 className="text-2xl font-medium">Reset password</h1>
-      <p className="text-sm text-foreground/60">
-        Please enter your new password below.
-      </p>
-      <Label htmlFor="password">New password</Label>
-      <Input
-        type="password"
-        name="password"
-        placeholder="New password"
-        required
-      />
-      <Label htmlFor="confirmPassword">Confirm password</Label>
-      <Input
-        type="password"
-        name="confirmPassword"
-        placeholder="Confirm password"
-        required
-      />
-      <SubmitButton formAction={resetPasswordAction}>
-        Reset password
-      </SubmitButton>
-      <FormMessage message={searchParams} />
-    </form>
+    <div className="flex h-screen w-screen flex-col justify-center space-y-6 sm:w-[350px] mx-auto">
+      <div className="flex flex-col space-y-2 text-center">
+        <Image
+          src="/logo.png"
+          width={50}
+          height={50}
+          alt="Logo"
+          className="mx-auto"
+        />
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Reset Password
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Enter your new password below
+        </p>
+      </div>
+
+      <AuthForm action={resetPasswordAction} schemaKey="updatePassword" submitText="Reset Password">
+        <ResetPasswordFields />
+      </AuthForm>
+
+      <FormMessage message={message} />
+    </div>
   )
 }
