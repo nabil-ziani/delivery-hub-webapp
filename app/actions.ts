@@ -1,5 +1,3 @@
-"use server";
-
 import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
@@ -8,48 +6,77 @@ import { redirect } from "next/navigation";
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
-  const supabase = await createClient();
-  const origin = (await headers()).get("origin");
+  const token = formData.get("token")?.toString();
 
+  const supabase = await createClient();
+
+  // Verify invite token
+  const { data: invite } = await supabase
+    .from('invite_tokens')
+    .select('*, organizations(*)')
+    .eq('token', token)
+    .is('used_at', null)
+    .gt('expires_at', new Date().toISOString())
+    .single();
+
+  if (!invite) {
+    return { error: "Invalid or expired invite link" };
+  }
+
+  // Create user
   if (!email || !password) {
     return { error: "Email and password are required" };
   }
 
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
+  const { data: { user }, error } = await supabase.auth.signUp({
+    email: email,
+    password: password,
   });
 
-  if (error) {
-    console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
-  } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
-    );
+  if (error) return { error: error.message };
+
+  // Add user to organization
+  if (!user) {
+    return { error: "Failed to create user" };
   }
+
+  await supabase.from('organization_members').insert({
+    user_id: user.id,
+    organization_id: invite.organization_id,
+    role: invite.role,
+  });
+
+  // Mark invite as used
+  await supabase
+    .from('invite_tokens')
+    .update({ used_at: new Date().toISOString() })
+    .eq('token', token);
+
+  // If admin, redirect to onboarding
+  if (invite.role === 'admin') {
+    return { redirect: '/onboarding' };
+  }
+
+  return { redirect: '/dashboard' };
 };
 
 export const signInAction = async (formData: FormData) => {
+  "use server"
+
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
-    password,
+    password
   });
 
   if (error) {
     return encodedRedirect("error", "/sign-in", error.message);
   }
 
-  return redirect("/protected");
+  return redirect("/");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
@@ -63,7 +90,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?redirect_to=/protected/reset-password`,
+    redirectTo: `${origin}/auth/callback?redirect_to=/reset-password`,
   });
 
   if (error) {
@@ -95,7 +122,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   if (!password || !confirmPassword) {
     encodedRedirect(
       "error",
-      "/protected/reset-password",
+      "/reset-password",
       "Password and confirm password are required",
     );
   }
@@ -103,7 +130,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   if (password !== confirmPassword) {
     encodedRedirect(
       "error",
-      "/protected/reset-password",
+      "/reset-password",
       "Passwords do not match",
     );
   }
@@ -115,12 +142,12 @@ export const resetPasswordAction = async (formData: FormData) => {
   if (error) {
     encodedRedirect(
       "error",
-      "/protected/reset-password",
+      "/reset-password",
       "Password update failed",
     );
   }
 
-  encodedRedirect("success", "/protected/reset-password", "Password updated");
+  encodedRedirect("success", "/reset-password", "Password updated");
 };
 
 export const signOutAction = async () => {
