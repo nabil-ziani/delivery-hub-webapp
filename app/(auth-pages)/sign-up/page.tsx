@@ -7,13 +7,29 @@ import { SignUpFormFields } from "@/components/auth/signup-form-fields"
 import AuthForm from "@/components/auth/auth-form"
 import { FormMessage, Message } from "@/components/form/form-message"
 
-export default async function SignUpPage({ searchParams }: { searchParams: Promise<Message> }) {
-  const message = await searchParams
+export default async function SignUpPage({ searchParams }: { searchParams: { token?: string; message?: string } & Message }) {
 
-  if ("message" in message) {
+  // Show error message if present
+  if (searchParams.message) {
     return (
       <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
-        <FormMessage message={message} />
+        <FormMessage message={{ error: searchParams.message }} />
+      </div>
+    )
+  }
+
+  // If no token is provided, show access denied
+  if (!searchParams.token) {
+    return (
+      <div className="flex h-screen w-screen flex-col justify-center space-y-6 sm:w-[350px] mx-auto">
+        <div className="flex flex-col space-y-2 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Access Denied
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            You need an invitation link to sign up.
+          </p>
+        </div>
       </div>
     )
   }
@@ -37,15 +53,9 @@ export default async function SignUpPage({ searchParams }: { searchParams: Promi
       </div>
 
       <AuthForm action={signUpAction} schemaKey="signUp" submitText="Sign up">
+        <input type="hidden" name="token" value={searchParams.token} />
         <SignUpFormFields />
       </AuthForm>
-
-      <p className="px-8 text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
-        <Link href="/sign-in" className="hover:text-brand underline underline-offset-4">
-          Sign in
-        </Link>
-      </p>
     </div>
   )
 }

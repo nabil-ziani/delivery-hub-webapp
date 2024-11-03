@@ -1,6 +1,6 @@
 "use server"
 
-import { encodedRedirect } from "@/utils/utils";
+import { encodedRedirect } from "@/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -9,6 +9,10 @@ export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
   const token = formData.get("token")?.toString();
+
+  if (!token) {
+    return { error: "Invite token is required" };
+  }
 
   const supabase = await createClient();
 
@@ -38,15 +42,19 @@ export const signUpAction = async (formData: FormData) => {
   if (error) return { error: error.message };
 
   // Add user to organization
-  if (!user) {
+  if (!user || !invite.organization_id) {
     return { error: "Failed to create user" };
   }
 
-  await supabase.from('organization_members').insert({
+  const { error: memberError } = await supabase.from('organization_members').insert({
     user_id: user.id,
     organization_id: invite.organization_id,
     role: invite.role,
   });
+
+  if (memberError) {
+    return { error: "Failed to add user to organization" };
+  }
 
   // Mark invite as used
   await supabase
@@ -76,21 +84,47 @@ export const signInAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-in", error.message);
   }
 
-  return redirect("/");
+  return redirect("/dashboard");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
-  const callbackUrl = formData.get("callbackUrl")?.toString();
 
   if (!email) {
     return encodedRedirect("error", "/forgot-password", "Email is required");
   }
 
+  // Check if user exists and is part of an organization
+  const { data: user } = await supabase
+    .from('organization_members')
+    .select('*, users:user_id(*)')
+    .eq('auth.users.email', email)
+    .single();
+
+  if (!user) {
+    // Return same message as success to prevent email enumeration
+    return encodedRedirect(
+      "success",
+      "/forgot-password",
+      "If an account exists with this email, you will receive a password reset link."
+    );
+  }
+
+  // Add additional security token
+  const securityCode = Math.random().toString(36).slice(-6).toUpperCase();
+
+  // Store the security code with an expiration
+  await supabase.from('password_resets')
+    .insert({
+      user_id: user.user_id,
+      security_code: securityCode,
+      expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes
+    });
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?redirect_to=/reset-password`,
+    redirectTo: `${origin}/auth/callback?redirect_to=/reset-password&code=${securityCode}`,
   });
 
   if (error) {
@@ -98,18 +132,14 @@ export const forgotPasswordAction = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       "/forgot-password",
-      "Could not reset password",
+      "Could not reset password"
     );
-  }
-
-  if (callbackUrl) {
-    return redirect(callbackUrl);
   }
 
   return encodedRedirect(
     "success",
     "/forgot-password",
-    "Check your email for a link to reset your password.",
+    "If an account exists with this email, you will receive a password reset link."
   );
 };
 
@@ -118,6 +148,24 @@ export const resetPasswordAction = async (formData: FormData) => {
 
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
+  const securityCode = formData.get("securityCode") as string;
+
+  // Verify security code
+  const { data: reset } = await supabase
+    .from('password_resets')
+    .select('*')
+    .eq('security_code', securityCode)
+    .is('used_at', null)
+    .gt('expires_at', new Date().toISOString())
+    .single();
+
+  if (!reset) {
+    return encodedRedirect(
+      "error",
+      "/reset-password",
+      "Invalid or expired security code"
+    );
+  }
 
   if (!password || !confirmPassword) {
     return encodedRedirect(
