@@ -1,11 +1,13 @@
 import { Eta } from 'eta';
 import fs from 'fs';
 import path from 'path';
-
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const eta = new Eta();
+const eta = new Eta({
+    views: path.join(process.cwd(), 'templates'),
+    cache: true
+});
 
 export async function sendRestaurantInviteEmail(email: string, inviteUrl: string) {
     try {
@@ -15,7 +17,7 @@ export async function sendRestaurantInviteEmail(email: string, inviteUrl: string
         const template = fs.readFileSync(templatePath, 'utf-8');
         console.log('Template loaded successfully');
 
-        const html = eta.render(template, {
+        const html = eta.renderString(template, {
             SiteURL: process.env.NEXT_PUBLIC_SITE_URL,
             ConfirmationURL: inviteUrl
         });
