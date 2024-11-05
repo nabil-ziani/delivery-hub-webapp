@@ -1,4 +1,12 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+    webpack: (config, { isServer }) => {
+        config.ignoreWarnings = [
+            { module: /node_modules\/handlebars\/lib\/index\.js/ }
+        ];
 
-module.exports = nextConfig;
+        return config;
+    },
+}
+
+module.exports = nextConfig

@@ -23,6 +23,7 @@
     "clsx": "^2.1.1",
     "eta": "^3.5.0",
     "geist": "^1.2.1",
+    "handlebars": "^4.7.8",
     "lucide-react": "^0.436.0",
     "next": "latest",
     "next-themes": "^0.3.0",

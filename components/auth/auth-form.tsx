@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { Form } from '../ui/form'
 import { schemas } from '@/lib/validations/auth'
 import { SubmitButton } from '../form/submit-button'
+import { Spinner } from '../ui/spinner'
 
 interface AuthFormProps {
     schemaKey: keyof typeof schemas

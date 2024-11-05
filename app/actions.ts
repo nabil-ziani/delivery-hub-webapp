@@ -25,10 +25,6 @@ export const signUpAction = async (formData: FormData) => {
     .gt('expires_at', new Date().toISOString())
     .single();
 
-  if (inviteErr) {
-    console.log(inviteErr)
-  }
-
   if (!invite) {
     return { error: "Invalid or expired invite link" };
   }
@@ -52,33 +48,14 @@ export const signUpAction = async (formData: FormData) => {
 
   if (error) return { error: error.message };
 
-  // Add user to organization
-  if (!user || !invite.organization_id) {
-    return { error: "Failed to create user" };
-  }
-
-  const { error: memberError } = await supabase.from('organization_members').insert({
-    user_id: user.id,
-    organization_id: invite.organization_id,
-    role: invite.role,
-  });
-
-  if (memberError) {
-    return { error: "Failed to add user to organization" };
-  }
-
   // Mark invite as used
   await supabase
     .from('invite_tokens')
     .update({ used_at: new Date().toISOString() })
     .eq('token', token);
 
-  // If restaurant owner, redirect to onboarding
-  if (invite.role === 'owner') {
-    return { redirect: '/onboarding' };
-  }
-
-  return { redirect: '/dashboard' };
+  // We'll handle organization membership after email confirmation
+  return { success: "Check your email to confirm your account" };
 };
 
 export const signInAction = async (formData: FormData) => {
