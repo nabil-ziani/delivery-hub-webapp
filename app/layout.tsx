@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "next-themes";
 
 import { poppins } from "@/app/fonts"
+import { Toaster } from "@/components/ui/toaster";
 
 const defaultUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning className={poppins.variable}>
       <body className="bg-background text-foreground font-poppins antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Toaster />
           <main className="min-h-screen flex flex-col items-center">
             {children}
           </main>

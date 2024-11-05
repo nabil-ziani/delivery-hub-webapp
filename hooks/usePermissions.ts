@@ -19,7 +19,7 @@ export function usePermissions() {
                 .single();
 
             setPermissions({
-                canInviteCouriers: member?.role === 'admin',
+                canInviteCouriers: member?.role === 'owner',
                 canViewMap: true, // Both roles can view
                 canUpdateLocation: member?.role === 'courier',
             });

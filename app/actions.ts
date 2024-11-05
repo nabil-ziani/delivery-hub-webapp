@@ -35,9 +35,6 @@ export const signUpAction = async (formData: FormData) => {
 
   // Create user
   if (!email || !password) {
-    console.log("email", email)
-    console.log("password", password)
-
     return { error: "Email and password are required" };
   }
 
@@ -45,9 +42,6 @@ export const signUpAction = async (formData: FormData) => {
     email: email,
     password: password,
   });
-
-  console.log("user", user)
-  console.log("error", error)
 
   if (error) return { error: error.message };
 
@@ -72,8 +66,8 @@ export const signUpAction = async (formData: FormData) => {
     .update({ used_at: new Date().toISOString() })
     .eq('token', token);
 
-  // If admin, redirect to onboarding
-  if (invite.role === 'admin') {
+  // If restaurant owner, redirect to onboarding
+  if (invite.role === 'owner') {
     return { redirect: '/onboarding' };
   }
 

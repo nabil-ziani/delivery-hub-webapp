@@ -28,8 +28,6 @@ const AuthForm = ({ children, action, schemaKey, submitText, initialValues = {} 
         [key]: initialValues[key] || ''
     }), {})
 
-    console.log(defaultValues)
-
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
         defaultValues

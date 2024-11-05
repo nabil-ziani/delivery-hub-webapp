@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { randomUUID } from "crypto";
 
-export const generateAdminInvite = async (email: string) => {
+export const generateRestaurantInvite = async (email: string) => {
     const supabase = await createClient();
 
     // Create organization placeholder with a name
@@ -29,7 +29,7 @@ export const generateAdminInvite = async (email: string) => {
         .insert({
             token,
             organization_id: org.id,
-            role: 'admin',
+            role: 'owner',
             email,
             expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         })

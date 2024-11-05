@@ -1,10 +1,10 @@
-import { generateAdminInvite } from "@/app/admin/actions";
+import { generateRestaurantInvite } from "@/app/admin/actions";
 
 export default function GenerateInvitePage() {
     async function handleGenerateInvite(formData: FormData) {
         'use server'
         const email = formData.get('email') as string;
-        const inviteLink = await generateAdminInvite(email);
+        const inviteLink = await generateRestaurantInvite(email);
         // In production, you would send this link via email
         console.log(inviteLink);
         return inviteLink;
