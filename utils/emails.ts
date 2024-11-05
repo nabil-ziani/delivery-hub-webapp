@@ -16,6 +16,7 @@ export async function sendRestaurantInviteEmail(email: string, inviteUrl: string
         });
 
         const result = await resend.emails.send({
+            
             from: 'no-reply@deliverhive.com',
             to: email,
             subject: 'You\'ve been invited to create a DeliverHive account',

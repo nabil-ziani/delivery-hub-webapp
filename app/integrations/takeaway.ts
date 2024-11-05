@@ -1,3 +1,4 @@
+/*
 import { createClient } from "@/utils/supabase/server";
 
 interface TakeawayOrder {
@@ -47,3 +48,4 @@ export class TakeawayIntegration {
         // Process incoming order
     }
 } 
+*/

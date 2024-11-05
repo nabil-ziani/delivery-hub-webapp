@@ -1,6 +1,6 @@
 'use client';
 
-import { sendInviteEmail } from "@/utils/emails";
+import { sendRestaurantInviteEmail } from "@/utils/emails";
 import { createClient } from "@/utils/supabase/client";
 
 export async function InviteCourier() {
@@ -27,7 +27,7 @@ export async function InviteCourier() {
             .single();
 
         // Send email with invite link
-        await sendInviteEmail(email as string, `/sign-up?token=${invite.token}`);
+        await sendRestaurantInviteEmail(email as string, `/sign-up?token=${invite.token}`);
     };
 
     return (

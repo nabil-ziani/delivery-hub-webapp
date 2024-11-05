@@ -17,7 +17,7 @@ export const signUpAction = async (formData: FormData) => {
   const supabase = await createClient();
 
   // Verify invite token
-  const { data: invite, error: inviteErr } = await supabase
+  const { data: invite } = await supabase
     .from('invite_tokens')
     .select('*, organizations(*)')
     .eq('token', token)
@@ -34,9 +34,9 @@ export const signUpAction = async (formData: FormData) => {
     return { error: "Email and password are required" };
   }
 
-  const { data: { user }, error } = await supabase.auth.signUp({
-    email: email,
-    password: password,
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
     options: {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
       data: {
@@ -46,7 +46,13 @@ export const signUpAction = async (formData: FormData) => {
     }
   });
 
+  console.log(error);
   if (error) return { error: error.message };
+
+  // Check if email is already taken
+  if (data.user?.identities && data.user.identities.length === 0) {
+    return { error: "Email address is already taken" };
+  }
 
   // Mark invite as used
   await supabase
@@ -54,8 +60,11 @@ export const signUpAction = async (formData: FormData) => {
     .update({ used_at: new Date().toISOString() })
     .eq('token', token);
 
-  // We'll handle organization membership after email confirmation
-  return { success: "Check your email to confirm your account" };
+  return encodedRedirect(
+    "success",
+    "/sign-in",
+    "Check your email to continue sign in process"
+  );
 };
 
 export const signInAction = async (formData: FormData) => {
