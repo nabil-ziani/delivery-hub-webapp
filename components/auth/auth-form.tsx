@@ -15,17 +15,20 @@ interface AuthFormProps {
     action: (formData: FormData) => Promise<Response | { error: string } | { redirect: string }>
     submitText: string
     children: ReactNode
+    initialValues?: Record<string, string>
 }
 
-const AuthForm = ({ children, action, schemaKey, submitText }: AuthFormProps) => {
+const AuthForm = ({ children, action, schemaKey, submitText, initialValues = {} }: AuthFormProps) => {
     const { toast } = useToast()
     const router = useRouter()
 
     const schema = schemas[schemaKey]
     const defaultValues = Object.keys(schema instanceof z.ZodEffects ? schema._def.schema.shape : schema.shape).reduce((acc, key) => ({
         ...acc,
-        [key]: ''
+        [key]: initialValues[key] || ''
     }), {})
+
+    console.log(defaultValues)
 
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),

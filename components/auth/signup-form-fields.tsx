@@ -4,12 +4,11 @@ import { PasswordInput } from "../form/password-input"
 import { useFormContext } from "react-hook-form"
 import { TextInput } from "../form/text-input"
 
-export function SignUpFormFields({ token }: { token: string }) {
+export function SignUpFormFields() {
     const { control } = useFormContext()
 
     return (
         <div className="grid gap-4">
-            <input type="hidden" name="token" value={token} />
             <TextInput
                 control={control!}
                 name="email"

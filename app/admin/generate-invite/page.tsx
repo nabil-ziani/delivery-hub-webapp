@@ -21,10 +21,7 @@ export default function GenerateInvitePage() {
                     className="w-full p-2 border rounded mb-4"
                     required
                 />
-                <button
-                    type="submit"
-                    className="w-full bg-primary text-white p-2 rounded"
-                >
+                <button type="submit" className="w-full bg-primary text-white p-2 rounded">
                     Generate Invite Link
                 </button>
             </form>

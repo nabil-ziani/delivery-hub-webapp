@@ -17,7 +17,7 @@ export const signUpAction = async (formData: FormData) => {
   const supabase = await createClient();
 
   // Verify invite token
-  const { data: invite } = await supabase
+  const { data: invite, error: inviteErr } = await supabase
     .from('invite_tokens')
     .select('*, organizations(*)')
     .eq('token', token)
@@ -25,12 +25,19 @@ export const signUpAction = async (formData: FormData) => {
     .gt('expires_at', new Date().toISOString())
     .single();
 
+  if (inviteErr) {
+    console.log(inviteErr)
+  }
+
   if (!invite) {
     return { error: "Invalid or expired invite link" };
   }
 
   // Create user
   if (!email || !password) {
+    console.log("email", email)
+    console.log("password", password)
+
     return { error: "Email and password are required" };
   }
 
@@ -38,6 +45,9 @@ export const signUpAction = async (formData: FormData) => {
     email: email,
     password: password,
   });
+
+  console.log("user", user)
+  console.log("error", error)
 
   if (error) return { error: error.message };
 

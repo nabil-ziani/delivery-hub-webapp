@@ -54,8 +54,8 @@ export default async function SignUpPage({ searchParams }: { searchParams: { tok
         </p>
       </div>
 
-      <AuthForm action={signUpAction} schemaKey="signUp" submitText="Sign up">
-        <SignUpFormFields token={token} />
+      <AuthForm action={signUpAction} schemaKey="signUp" submitText="Sign up" initialValues={{ token }}>
+        <SignUpFormFields />
       </AuthForm>
     </div>
   )
