@@ -5,7 +5,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Define public paths
-  const publicPaths = ['/sign-in', '/sign-up', '/auth/callback', '/forgot-password', '/reset-password'];
+  const publicPaths = ['/sign-in', '/sign-up', '/api/auth/callback', '/forgot-password', '/reset-password'];
 
   // Allow public paths without authentication
   if (publicPaths.includes(pathname)) {

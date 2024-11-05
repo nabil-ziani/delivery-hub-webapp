@@ -38,7 +38,7 @@ export const signUpAction = async (formData: FormData) => {
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
       data: {
         organization_id: invite.organization_id,
         role: invite.role
@@ -121,7 +121,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
     });
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?redirect_to=/reset-password&code=${securityCode}`,
+    redirectTo: `${origin}/api/auth/callback?redirect_to=/reset-password&code=${securityCode}`,
   });
 
   if (error) {
