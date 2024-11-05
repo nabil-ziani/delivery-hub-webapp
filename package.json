@@ -4,7 +4,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "gen": "npx supabase gen types --lang=typescript --project-id \"xqbchgjnfogwklifbhqe\" --schema public > types/database.types.ts"
+    "db:migration": "npx supabase migration new",
+    "db:push": "npx supabase db push",
+    "db:types": "npx supabase gen types typescript --project-ref xqbchgjnfogwklifbhqe > types/database.types.ts",
+    "db:pull": "npx supabase db pull"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -18,6 +21,7 @@
     "autoprefixer": "10.4.17",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "eta": "^3.5.0",
     "geist": "^1.2.1",
     "lucide-react": "^0.436.0",
     "next": "latest",

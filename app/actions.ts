@@ -41,6 +41,13 @@ export const signUpAction = async (formData: FormData) => {
   const { data: { user }, error } = await supabase.auth.signUp({
     email: email,
     password: password,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      data: {
+        organization_id: invite.organization_id,
+        role: invite.role
+      }
+    }
   });
 
   if (error) return { error: error.message };
