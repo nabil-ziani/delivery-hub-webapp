@@ -1,14 +1,10 @@
 'use client';
 
-import { generateRestaurantInvite } from "@/app/admin/actions";
-import { useToast } from "@/hooks/use-toast";
+import { generateRestaurantInvite } from "@/actions/admin";
 import { useState } from "react";
-import { Spinner } from "@/components/ui/spinner";
 
 export function GenerateInviteForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const { toast } = useToast();
 
     async function handleGenerateInvite(formData: FormData) {
         if (isSubmitting) return;
@@ -16,17 +12,21 @@ export function GenerateInviteForm() {
         setIsSubmitting(true);
         try {
             await generateRestaurantInvite(formData.get('email') as string);
-            toast({
+            /**
+             * toast({
                 title: "Success",
                 description: "Invite sent successfully",
                 variant: "default",
             });
+             */
         } catch (error) {
-            toast({
+            /**
+             *  toast({
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to send invite",
                 variant: "destructive",
             });
+             */
         } finally {
             setIsSubmitting(false);
         }
@@ -47,7 +47,7 @@ export function GenerateInviteForm() {
                 className="w-full bg-primary text-white p-2 rounded disabled:opacity-50"
                 disabled={isSubmitting}
             >
-                {isSubmitting && <Spinner />}
+                {/* isSubmitting && <Spinner /> */}
                 {isSubmitting ? 'Sending...' : 'Generate Invite Link'}
             </button>
         </form>
