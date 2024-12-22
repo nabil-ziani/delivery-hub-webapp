@@ -143,7 +143,7 @@ export const resetPasswordAction = async (formData: FormData): Promise<AuthRespo
 
         const supabase = await createClient();
 
-        // Verify security code
+        // First try to verify if this is a password reset
         const { data: reset } = await supabase
             .from('password_resets')
             .select('*')
@@ -152,29 +152,42 @@ export const resetPasswordAction = async (formData: FormData): Promise<AuthRespo
             .gt('expires_at', new Date().toISOString())
             .single();
 
+        // Handle invite token first to establish session
         if (!reset) {
-            return { error: "Invalid or expired security code" };
+            // Exchange the token for a session
+            const { error: sessionError } = await supabase.auth.verifyOtp({
+                token_hash: securityCode,
+                type: 'invite',
+            });
+
+            if (sessionError) {
+                return { error: "Invalid invite link" };
+            }
         }
 
-        const { error } = await supabase.auth.updateUser({
+        // Now that we have a session (either from invite or existing), update the password
+        const { error: updateError } = await supabase.auth.updateUser({
             password: password,
         });
 
-        if (error) {
+        if (updateError) {
             return { error: "Password update failed" };
         }
 
-        // Mark security code as used
-        await supabase
-            .from('password_resets')
-            .update({ used_at: new Date().toISOString() })
-            .eq('security_code', securityCode);
+        // If it was a password reset, mark the code as used
+        if (reset) {
+            await supabase
+                .from('password_resets')
+                .update({ used_at: new Date().toISOString() })
+                .eq('security_code', securityCode);
+        }
 
         return {
             success: true,
-            message: "Password updated successfully"
+            message: reset ? "Password updated successfully" : "Account setup completed successfully"
         };
     } catch (error) {
+        console.error('Reset password error:', error);
         return { error: "An unexpected error occurred" };
     }
 };

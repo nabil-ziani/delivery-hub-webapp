@@ -4,7 +4,7 @@ import React from "react";
 import { Button, Input, Form } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { resetPasswordAction } from "@/actions/auth";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Heading from "./heading";
 
@@ -13,6 +13,11 @@ export function UpdatePasswordForm() {
     const [isConfirmVisible, setIsConfirmVisible] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
     const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const isInvite = searchParams.get('type') === 'invite';
+    const title = isInvite ? "Welcome to Delivery Hub" : "Update Password";
+    const description = isInvite ? "Please set your password to continue" : "Enter your new password";
 
     const toggleVisibility = () => setIsVisible(!isVisible);
     const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible);
@@ -23,20 +28,25 @@ export function UpdatePasswordForm() {
 
         try {
             const formData = new FormData(event.currentTarget);
-            const code = searchParams.get("code");
+            const securityCode = searchParams.get("code") || searchParams.get("token");
 
-            if (!code) {
-                toast.error("Invalid reset link");
+            if (!securityCode) {
+                toast.error("Invalid link");
                 return;
             }
 
-            formData.append("securityCode", code);
+            formData.append("securityCode", securityCode);
             const result = await resetPasswordAction(formData);
 
             if (result && "error" in result) {
                 toast.error(result.error);
             } else {
-                toast.success("Password updated successfully! You can now sign in with your new password.");
+                toast.success(result?.message || "Password updated successfully!");
+                if (isInvite) {
+                    router.push("/onboarding");
+                } else {
+                    router.push("/sign-in");
+                }
             }
         } catch (error) {
             toast.error("An error occurred while updating your password");
@@ -47,7 +57,7 @@ export function UpdatePasswordForm() {
 
     return (
         <div className="flex h-full w-full flex-col items-center justify-center">
-            <Heading title="Update Password" description="Enter your new password" />
+            <Heading title={title} description={description} />
 
             <div className="mt-2 flex w-full max-w-sm flex-col gap-4 rounded-large bg-content1 px-8 py-6 shadow-small">
                 <Form className="flex flex-col gap-3" validationBehavior="native" onSubmit={handleSubmit}>
@@ -103,7 +113,7 @@ export function UpdatePasswordForm() {
                         type="submit"
                         isLoading={isLoading}
                     >
-                        Update Password
+                        {isInvite ? "Complete Setup" : "Update Password"}
                     </Button>
                 </Form>
             </div>
