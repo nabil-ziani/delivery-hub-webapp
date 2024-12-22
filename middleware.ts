@@ -21,9 +21,11 @@ export async function middleware(request: NextRequest) {
   // Check authentication for all other routes
   try {
     const supabase = createClient(request);
-    const { data: { session } } = await supabase.auth.getSession();
 
-    if (!session) {
+    // Get authenticated user data
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
       return NextResponse.redirect(new URL('/sign-in', request.url));
     }
 
@@ -31,7 +33,7 @@ export async function middleware(request: NextRequest) {
     const { data: member } = await supabase
       .from('organization_members')
       .select('role')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
 
     // Special case for onboarding

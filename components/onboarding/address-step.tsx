@@ -87,8 +87,8 @@ export function AddressStep({ formData, onChange, isLoading }: AddressStepProps)
 
                 // Try to extract city and postal code from the address
                 const addressParts = data[0].display_name.split(", ");
-                const cityMatch = addressParts.find(part => part.match(/[A-Z][a-z]+/));
-                const postalMatch = addressParts.find(part => part.match(/\d{4}\s?[A-Z]{2}/));
+                const cityMatch = addressParts.find((part: string) => part.match(/[A-Z][a-z]+/));
+                const postalMatch = addressParts.find((part: string) => part.match(/\d{4}\s?[A-Z]{2}/));
 
                 if (cityMatch && !formData.city) onChange("city", cityMatch);
                 if (postalMatch && !formData.postalCode) onChange("postalCode", postalMatch);
