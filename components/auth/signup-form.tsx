@@ -1,21 +1,47 @@
 "use client";
 
 import React from "react";
-import { Button, Input, Checkbox, Link, Form } from "@nextui-org/react";
+import { Button, Input, Link, Form } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
-
+import { signUpAction } from "@/actions/auth";
+import { useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function SignUpForm() {
     const [isVisible, setIsVisible] = React.useState(false);
     const [isConfirmVisible, setIsConfirmVisible] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState(false);
+    const searchParams = useSearchParams();
 
     const toggleVisibility = () => setIsVisible(!isVisible);
     const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible);
 
-    // TODO: Add sign up action
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log("handleSubmit");
+        setIsLoading(true);
+
+        try {
+            const formData = new FormData(event.currentTarget);
+            const token = searchParams.get("token");
+            if (token) {
+                formData.append("token", token);
+            } else {
+                toast.error("Invalid invite link");
+                return;
+            }
+
+            const result = await signUpAction(formData);
+
+            if (result && "error" in result) {
+                toast.error(result.error);
+            } else {
+                toast.success("Account created successfully! Please check your email to verify your account.");
+            }
+        } catch (error) {
+            toast.error("An error occurred during sign up");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -42,6 +68,7 @@ export default function SignUpForm() {
                         placeholder="Enter your email"
                         type="email"
                         variant="bordered"
+                        isDisabled={isLoading}
                     />
                     <Input
                         isRequired
@@ -65,6 +92,7 @@ export default function SignUpForm() {
                         placeholder="Enter your password"
                         type={isVisible ? "text" : "password"}
                         variant="bordered"
+                        isDisabled={isLoading}
                     />
                     <Input
                         isRequired
@@ -88,20 +116,16 @@ export default function SignUpForm() {
                         placeholder="Confirm your password"
                         type={isConfirmVisible ? "text" : "password"}
                         variant="bordered"
+                        isDisabled={isLoading}
                     />
-                    <div className="flex w-full items-center gap-2 py-2">
-                        <Checkbox name="terms" size="sm">
-                            I agree to the <Link href="#">Terms</Link> and <Link href="#">Privacy Policy</Link>
-                        </Checkbox>
-                    </div>
-                    <Button className="w-full" color="primary" type="submit">
-                        Sign Up
+                    <Button className="w-full" color="primary" type="submit" isLoading={isLoading}>
+                        Create Account
                     </Button>
                 </Form>
                 <p className="text-center text-small">
                     Already have an account?&nbsp;
                     <Link href="/sign-in" size="sm">
-                        Log In
+                        Sign In
                     </Link>
                 </p>
             </div>

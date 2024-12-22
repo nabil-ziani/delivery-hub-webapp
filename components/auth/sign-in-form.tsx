@@ -3,20 +3,41 @@
 import React from "react";
 import { Button, Input, Checkbox, Link, Form } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
+import { signInAction } from "@/actions/auth";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function SignInForm() {
     const [isVisible, setIsVisible] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    const router = useRouter();
 
     const toggleVisibility = () => setIsVisible(!isVisible);
 
-    // TODO: Add sign in action
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log("handleSubmit");
+        setIsLoading(true);
+
+        try {
+            const formData = new FormData(event.currentTarget);
+            const result = await signInAction(formData);
+
+            if (result && "error" in result) {
+                toast.error(result.error);
+            } else {
+                toast.success("Successfully signed in!");
+                router.push("/dashboard");
+            }
+        } catch (error) {
+            toast.error("An error occurred during sign in");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
-        <div className="flex h-full  w-full flex-col items-center justify-center">
+        <div className="flex h-full w-full flex-col items-center justify-center">
             <div className="flex flex-col items-center pb-6">
                 <img
                     src="/logo.png"
@@ -37,6 +58,7 @@ export default function SignInForm() {
                         placeholder="you@example.com"
                         type="email"
                         variant="bordered"
+                        isDisabled={isLoading}
                     />
                     <Input
                         isRequired
@@ -60,16 +82,17 @@ export default function SignInForm() {
                         placeholder="********"
                         type={isVisible ? "text" : "password"}
                         variant="bordered"
+                        isDisabled={isLoading}
                     />
                     <div className="flex w-full items-center justify-between px-1 py-2">
-                        <Checkbox name="remember" size="sm">
+                        <Checkbox name="remember" size="sm" isDisabled={isLoading}>
                             Remember me
                         </Checkbox>
-                        <Link className="text-default-500" href="#" size="sm">
+                        <Link className="text-default-500" href="/forgot-password" size="sm">
                             Forgot password?
                         </Link>
                     </div>
-                    <Button className="w-full" color="primary" type="submit">
+                    <Button className="w-full" color="primary" type="submit" isLoading={isLoading}>
                         Log In
                     </Button>
                 </Form>

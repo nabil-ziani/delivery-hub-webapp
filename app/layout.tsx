@@ -2,6 +2,7 @@ import { NextUIProvider } from "@nextui-org/react";
 import "./globals.css";
 
 import { poppins } from "@/app/fonts"
+import { ToastProvider } from "@/context/toast-context";
 
 const defaultUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"
 
@@ -16,7 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="en" suppressHydrationWarning className={poppins.variable}>
             <body className="bg-background text-foreground font-poppins antialiased">
                 <NextUIProvider>
-                    {children}
+                    <ToastProvider>
+                        {children}
+                    </ToastProvider>
                 </NextUIProvider>
             </body>
         </html >
