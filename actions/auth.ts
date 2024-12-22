@@ -10,11 +10,9 @@ export const signUpAction = async (formData: FormData): Promise<AuthResponse> =>
     const email = formData.get("email")?.toString() || "";
     const password = formData.get("password")?.toString() || "";
     const confirmPassword = formData.get("confirmPassword")?.toString() || "";
-    const token = formData.get("token")?.toString() || "";
 
     try {
-        // Validate input
-        const result = SignUpSchema.safeParse({ email, password, confirmPassword, token });
+        const result = SignUpSchema.safeParse({ email, password, confirmPassword });
         if (!result.success) {
             const error = result.error.issues[0];
             return { error: error.message };
@@ -22,47 +20,20 @@ export const signUpAction = async (formData: FormData): Promise<AuthResponse> =>
 
         const supabase = await createClient();
 
-        // Verify invite token
-        const { data: invite } = await supabase
-            .from('invite_tokens')
-            .select('*, organizations(*)')
-            .eq('token', token)
-            .is('used_at', null)
-            .gt('expires_at', new Date().toISOString())
-            .single();
-
-        if (!invite) {
-            return { error: "Invalid or expired invite link" };
-        }
-
-        const { data, error } = await supabase.auth.signUp({
+        // Sign up with Supabase
+        const { error } = await supabase.auth.signUp({
             email,
             password,
             options: {
-                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
-                data: {
-                    organization_id: invite.organization_id,
-                    role: invite.role
-                }
+                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`
             }
         });
 
         if (error) return { error: error.message };
 
-        // Check if email is already taken
-        if (data.user?.identities && data.user.identities.length === 0) {
-            return { error: "Email address is already taken" };
-        }
-
-        // Mark invite as used
-        await supabase
-            .from('invite_tokens')
-            .update({ used_at: new Date().toISOString() })
-            .eq('token', token);
-
         return {
             success: true,
-            message: "Check your email to continue sign in process"
+            message: "Account created! Please check your email to verify your account."
         };
     } catch (error) {
         return { error: "An unexpected error occurred" };
@@ -74,7 +45,6 @@ export const signInAction = async (formData: FormData): Promise<AuthResponse> =>
     const password = formData.get("password")?.toString() || "";
 
     try {
-        // Validate input
         const result = SignInSchema.safeParse({ email, password });
         if (!result.success) {
             const error = result.error.issues[0];
@@ -87,12 +57,13 @@ export const signInAction = async (formData: FormData): Promise<AuthResponse> =>
             email,
             password
         });
+        console.log(error);
 
         if (error) {
             return { error: error.message };
         }
 
-        return redirect("/dashboard");
+        return redirect("/");
     } catch (error) {
         return { error: "An unexpected error occurred" };
     }
@@ -102,7 +73,6 @@ export const forgotPasswordAction = async (formData: FormData): Promise<AuthResp
     const email = formData.get("email")?.toString() || "";
 
     try {
-        // Validate input
         const result = ResetPasswordSchema.safeParse({ email });
         if (!result.success) {
             const error = result.error.issues[0];
@@ -165,7 +135,6 @@ export const resetPasswordAction = async (formData: FormData): Promise<AuthRespo
     }
 
     try {
-        // Validate input
         const result = UpdatePasswordSchema.safeParse({ password, confirmPassword });
         if (!result.success) {
             const error = result.error.issues[0];

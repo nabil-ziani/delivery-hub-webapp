@@ -5,18 +5,12 @@ import type { NextRequest } from 'next/server';
 const PUBLIC_ROUTES = ['/sign-in', '/sign-up', '/reset-password'];
 
 export async function middleware(request: NextRequest) {
-  const { pathname, searchParams, hash } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
 
-  // Handle Supabase invite URLs (access_token in hash)
-  if (pathname === '/sign-in' && hash.includes('type=invite')) {
-    // Keep the hash when redirecting to preserve the access token
-    return NextResponse.redirect(new URL(`/sign-up${hash}`, request.url));
-  }
-
-  // Handle custom invite URLs (invite_token in query)
-  const inviteToken = searchParams.get('invite_token');
-  if (inviteToken && pathname === '/sign-in') {
-    return NextResponse.redirect(new URL(`/sign-up?invite_token=${inviteToken}`, request.url));
+  // Handle Supabase invite URLs
+  if (pathname === '/verify' && searchParams.get('type') === 'invite') {
+    // Keep all query parameters when redirecting
+    return NextResponse.redirect(new URL(`/sign-up?${searchParams.toString()}`, request.url));
   }
 
   // Allow public routes

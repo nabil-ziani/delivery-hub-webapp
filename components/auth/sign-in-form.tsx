@@ -6,11 +6,11 @@ import { Icon } from "@iconify/react";
 import { signInAction } from "@/actions/auth";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import Heading from "./heading";
 
 export default function SignInForm() {
     const [isVisible, setIsVisible] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
-
     const router = useRouter();
 
     const toggleVisibility = () => setIsVisible(!isVisible);
@@ -27,7 +27,7 @@ export default function SignInForm() {
                 toast.error(result.error);
             } else {
                 toast.success("Successfully signed in!");
-                router.push("/dashboard");
+                router.push("/");
             }
         } catch (error) {
             toast.error("An error occurred during sign in");
@@ -38,17 +38,8 @@ export default function SignInForm() {
 
     return (
         <div className="flex h-full w-full flex-col items-center justify-center">
-            <div className="flex flex-col items-center pb-6">
-                <img
-                    src="/logo.png"
-                    width={50}
-                    height={50}
-                    alt="Logo"
-                    className="mx-auto"
-                />
-                <p className="text-xl font-medium">Welcome Back</p>
-                <p className="text-small text-default-500">Log in to your account to continue</p>
-            </div>
+            <Heading title="Welcome Back" description="Log in to your account to continue" />
+
             <div className="mt-2 flex w-full max-w-sm flex-col gap-4 rounded-large bg-content1 px-8 py-6 shadow-small">
                 <Form className="flex flex-col gap-3" validationBehavior="native" onSubmit={handleSubmit}>
                     <Input

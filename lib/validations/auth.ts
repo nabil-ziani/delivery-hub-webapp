@@ -1,29 +1,28 @@
 import * as z from "zod"
 
 export const SignInSchema = z.object({
-    email: z.string().min(1, { message: 'Field is required' }).email({ message: 'Invalid email' }),
-    password: z.string().min(8, { message: "Password too short, 8 characters required" }),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(1, "Password is required"),
 })
 
 export const SignUpSchema = z.object({
-    email: z.string().min(1, { message: 'Field is required' }).email({ message: 'Invalid email' }),
-    password: z.string().min(8, { message: "Password too short, 8 characters required" }),
-    confirmPassword: z.string(),
-    token: z.string()
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "Passwords don't match",
     path: ["confirmPassword"],
 })
 
 export const ResetPasswordSchema = z.object({
-    email: z.string().min(1, { message: 'Field is required' }).email({ message: "Email is required" }),
+    email: z.string().email("Invalid email address"),
 })
 
 export const UpdatePasswordSchema = z.object({
-    password: z.string().min(8, { message: "Password too short, 8 characters required" }),
-    confirmPassword: z.string(),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "Passwords don't match",
     path: ["confirmPassword"],
 })
 

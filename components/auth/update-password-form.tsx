@@ -6,6 +6,7 @@ import { Icon } from "@iconify/react";
 import { resetPasswordAction } from "@/actions/auth";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import Heading from "./heading";
 
 export function UpdatePasswordForm() {
     const [isVisible, setIsVisible] = React.useState(false);
@@ -46,19 +47,8 @@ export function UpdatePasswordForm() {
 
     return (
         <div className="flex h-full w-full flex-col items-center justify-center">
-            <div className="flex flex-col items-center pb-6">
-                <img
-                    src="/logo.png"
-                    width={50}
-                    height={50}
-                    alt="Logo"
-                    className="mx-auto"
-                />
-                <p className="text-xl font-medium">Update Password</p>
-                <p className="text-small text-default-500">
-                    Enter your new password
-                </p>
-            </div>
+            <Heading title="Update Password" description="Enter your new password" />
+
             <div className="mt-2 flex w-full max-w-sm flex-col gap-4 rounded-large bg-content1 px-8 py-6 shadow-small">
                 <Form className="flex flex-col gap-3" validationBehavior="native" onSubmit={handleSubmit}>
                     <Input
