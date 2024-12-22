@@ -1,64 +1,68 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createClient } from '@/utils/supabase/middleware';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+const PUBLIC_ROUTES = ['/sign-in', '/sign-up', '/reset-password'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Define public paths
-  const publicPaths = ['/sign-in', '/sign-up', '/api/auth/callback', '/forgot-password', '/reset-password'];
-
-  // Allow public paths without authentication
-  if (publicPaths.includes(pathname)) {
+  // Allow public routes
+  if (PUBLIC_ROUTES.includes(pathname)) {
     return NextResponse.next();
   }
 
-  // Special case for sign-up with token
-  if (pathname === '/sign-up' && request.nextUrl.searchParams.has('token')) {
+  // Check authentication for all other routes
+  try {
+    const supabase = createClient(request);
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.redirect(new URL('/sign-in', request.url));
+    }
+
+    // Special case for onboarding
+    if (pathname === '/onboarding') {
+      const { data: member } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (member) {
+        // User already completed onboarding, redirect to dashboard
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+    }
+
+    // Check admin access
+    if (pathname.startsWith('/admin')) {
+      const { data: member } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (!member || member.role !== 'owner') {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+    }
+
     return NextResponse.next();
-  }
-
-  // For all other routes, require authentication
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          response = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
-        },
-      },
-    },
-  );
-
-
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (!session) {
+  } catch (error) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
   }
-
-  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - logo.png (logo file)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|logo.png).*)',
   ],
 };

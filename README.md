@@ -20,21 +20,93 @@ Delivery Hub is a centralized platform for restaurants to manage and track deliv
   - Track courier locations in real-time
   - Monitor delivery status
 
+## Authentication & Onboarding Flow
+
+### Current Implementation
+1. **Admin Registration (via Supabase Dashboard)**
+   - Admin creates a new organization in Supabase
+   - Admin invites restaurant owner via Supabase Auth UI
+   - System sends invitation email to the restaurant owner
+
+2. **Restaurant Owner Flow**
+   - Owner receives invitation email
+   - Clicks link to create account on `/sign-up`
+   - Verifies email address
+   - Completes onboarding process:
+     1. Restaurant Details (name, description, logo)
+     2. Contact Information
+     3. Location (with map preview)
+     4. Opening Hours
+
+3. **Access Control**
+   - Public routes: `/sign-in`, `/sign-up`, `/reset-password`
+   - Protected routes require authentication
+   - Admin routes (`/admin/*`) require owner role
+   - Onboarding can only be completed once
+
+### Future Plans
+- [ ] Add public registration request page
+  - Restaurant owners can submit request to join platform
+  - Admin receives notification
+  - Admin can approve/deny request
+  - Upon approval, system sends invitation
+- [ ] Enhanced onboarding
+  - Add delivery radius settings
+  - Platform integrations setup
+  - Menu management
+  - Staff management
+
 ## Tech Stack
 - Next.js (React framework)
 - TypeScript
+- NextUI (UI components)
 - Tailwind CSS
-- Supabase (Backend/Database)
+- Supabase (Auth & Database)
+- Prisma (ORM)
 - OpenFreeMap (Map integration)
 
-## Getting Started
-[Development setup instructions to be added]
+## Development Setup
 
-## Environment Variables
-Required environment variables:
-- Database configuration
-- API keys for delivery platforms
-- Map configuration
+### Prerequisites
+- Node.js 18+
+- npm/yarn
+- Supabase account
+
+### Environment Variables
+Copy `.env.example` to `.env` and fill in:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+DATABASE_URL=your_database_url
+```
+
+### Installation
+```bash
+# Install dependencies
+npm install
+
+# Run database migrations
+npx supabase db push
+
+# Start development server
+npm run dev
+```
+
+### Database Migrations
+```bash
+# Create new migration
+npm run db:migration
+
+# Push migrations to database
+npm run db:push
+
+# Generate TypeScript types
+npm run db:types
+```
+
+## Contributing
+[Contributing guidelines to be added]
 
 ## License
 [License information to be added]

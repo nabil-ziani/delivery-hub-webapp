@@ -94,12 +94,6 @@ export default function SignInForm() {
                         Log In
                     </Button>
                 </Form>
-                <p className="text-center text-small">
-                    Need to create an account?&nbsp;
-                    <Link href="/sign-up" size="sm">
-                        Sign Up
-                    </Link>
-                </p>
             </div>
         </div>
     );
