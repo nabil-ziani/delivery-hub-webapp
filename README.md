@@ -23,20 +23,27 @@ Delivery Hub is a centralized platform for restaurants to manage and track deliv
 ## Authentication & Onboarding Flow
 
 ### Current Implementation
-1. **Admin Registration (via Supabase Dashboard)**
-   - Admin creates a new organization in Supabase
-   - Admin invites restaurant owner via Supabase Auth UI
-   - System sends invitation email to the restaurant owner
+1. **Admin Actions**
+   1. **Create Organization** (via SQL or Supabase Table Editor)
+      ```sql
+      INSERT INTO organizations (id, name, created_at, updated_at)
+      VALUES (gen_random_uuid(), 'Restaurant Name', NOW(), NOW());
+      ```
+   2. **Invite Restaurant Owner** (via Supabase Dashboard)
+      - Go to Authentication > Users > Invite users
+      - Enter restaurant owner's email
+      - System sends invitation email automatically
 
 2. **Restaurant Owner Flow**
-   - Owner receives invitation email
-   - Clicks link to create account on `/sign-up`
-   - Verifies email address
+   - Owner receives invitation email with magic link
+   - Clicking the link redirects to `/sign-up` with access token
+   - Creates account and verifies email
    - Completes onboarding process:
      1. Restaurant Details (name, description, logo)
      2. Contact Information
      3. Location (with map preview)
      4. Opening Hours
+   - System automatically links user to organization during onboarding
 
 3. **Access Control**
    - Public routes: `/sign-in`, `/sign-up`, `/reset-password`
