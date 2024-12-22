@@ -1,5 +1,4 @@
 import Logo from "@/components/logo";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 
 const Navbar = () => {
     return (
@@ -11,7 +10,6 @@ const Navbar = () => {
 
                     </div>
                 </div>
-                <ThemeSwitcher />
             </div>
         </nav>
     )
