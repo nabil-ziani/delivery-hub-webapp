@@ -55,7 +55,6 @@ export default function SignInForm() {
                         isRequired
                         label="Email Address"
                         name="email"
-                        placeholder="you@example.com"
                         type="email"
                         variant="bordered"
                         isDisabled={isLoading}
@@ -79,7 +78,6 @@ export default function SignInForm() {
                         }
                         label="Password"
                         name="password"
-                        placeholder="********"
                         type={isVisible ? "text" : "password"}
                         variant="bordered"
                         isDisabled={isLoading}
@@ -88,7 +86,7 @@ export default function SignInForm() {
                         <Checkbox name="remember" size="sm" isDisabled={isLoading}>
                             Remember me
                         </Checkbox>
-                        <Link className="text-default-500" href="/forgot-password" size="sm">
+                        <Link className="text-default-500" href="/reset-password" size="sm">
                             Forgot password?
                         </Link>
                     </div>

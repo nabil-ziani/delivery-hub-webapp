@@ -80,7 +80,6 @@ export function UpdatePasswordForm() {
                         }
                         label="New Password"
                         name="password"
-                        placeholder="Enter your new password"
                         type={isVisible ? "text" : "password"}
                         variant="bordered"
                         isDisabled={isLoading}
@@ -104,7 +103,6 @@ export function UpdatePasswordForm() {
                         }
                         label="Confirm New Password"
                         name="confirmPassword"
-                        placeholder="Confirm your new password"
                         type={isConfirmVisible ? "text" : "password"}
                         variant="bordered"
                         isDisabled={isLoading}

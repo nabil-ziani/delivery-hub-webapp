@@ -6,7 +6,7 @@
     "start": "next start",
     "db:migration": "npx supabase migration new",
     "db:push": "npx supabase db push",
-    "db:types": "npx supabase gen types typescript --project-ref xqbchgjnfogwklifbhqe > types/database.types.ts",
+    "db:types": "npx supabase gen types typescript --project-id xqbchgjnfogwklifbhqe > types/database.types.ts",
     "db:pull": "npx supabase db pull"
   },
   "dependencies": {
@@ -27,6 +27,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.53.1",
+    "react-hot-toast": "^2.4.1",
     "recharts": "^2.15.0",
     "resend": "^4.0.1-alpha.0",
     "usehooks-ts": "^3.1.0",

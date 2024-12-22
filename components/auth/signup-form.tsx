@@ -65,7 +65,6 @@ export default function SignUpForm() {
                         isRequired
                         label="Email Address"
                         name="email"
-                        placeholder="Enter your email"
                         type="email"
                         variant="bordered"
                         isDisabled={isLoading}
@@ -89,7 +88,6 @@ export default function SignUpForm() {
                         }
                         label="Password"
                         name="password"
-                        placeholder="Enter your password"
                         type={isVisible ? "text" : "password"}
                         variant="bordered"
                         isDisabled={isLoading}
@@ -113,7 +111,6 @@ export default function SignUpForm() {
                         }
                         label="Confirm Password"
                         name="confirmPassword"
-                        placeholder="Confirm your password"
                         type={isConfirmVisible ? "text" : "password"}
                         variant="bordered"
                         isDisabled={isLoading}
