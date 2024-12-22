@@ -2,8 +2,8 @@ import "@/app/globals.css";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="max-w-7xl flex flex-1 gap-12 items-center">
+    <main className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {children}
-    </div>
+    </main>
   )
 }

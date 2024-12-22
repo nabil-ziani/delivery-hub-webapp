@@ -7,6 +7,14 @@ const nextConfig = {
 
         return config;
     },
+    async rewrites() {
+        return [
+            {
+                source: '/api/map/:path*',
+                destination: 'https://api.openfreemap.org/:path*'
+            }
+        ]
+    }
 }
 
 module.exports = nextConfig

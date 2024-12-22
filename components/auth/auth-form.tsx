@@ -74,7 +74,7 @@ const AuthForm = ({ children, action, schemaKey, submitText, initialValues = {} 
 
     return (
         <Form {...form}>
-            <form action={action} method="POST" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form action={action} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {children}
                 <SubmitButton pendingText="Loading...">
                     {submitText}
