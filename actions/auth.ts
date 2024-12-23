@@ -126,18 +126,14 @@ export const updatePasswordAction = async (formData: FormData): Promise<AuthResp
 
         // Handle invite token first to establish session
         if (!reset) {
-            // Exchange the token for a session
-            const { error: sessionError } = await supabase.auth.verifyOtp({
-                token_hash: securityCode,
-                type: 'invite',
-            });
+            // For invite flow, get the existing session
+            const { data: { session } } = await supabase.auth.getSession();
 
-            if (sessionError) {
-                console.log(sessionError)
-                return { error: "Invalid invite link" };
+            if (!session) {
+                return { error: "Invalid or expired invite link" };
             }
 
-            // Get the current user after verifying OTP
+            // Get the current user from the session
             const { data: { user } } = await supabase.auth.getUser();
 
             if (user) {
@@ -183,11 +179,11 @@ export const updatePasswordAction = async (formData: FormData): Promise<AuthResp
                 .update({ used_at: new Date().toISOString() })
                 .eq('security_code', securityCode);
 
-            return redirect("/sign-in");
+            return { success: true, redirectTo: "/sign-in" };
         }
 
         // For invite flow, redirect to onboarding
-        return redirect("/onboarding");
+        return { success: true, redirectTo: "/onboarding" };
     } catch (error) {
         console.error('Reset password error:', error);
         return { error: "An unexpected error occurred" };

@@ -13,15 +13,21 @@ export async function GET(request: Request) {
   const supabase = await createClient();
 
   // Verify the invite token
-  const { error } = await supabase.auth.verifyOtp({
+  const { error, data } = await supabase.auth.verifyOtp({
     token_hash: token,
     type: 'invite',
   });
 
-  if (error) {
+  if (error || !data.session) {
     console.error('Verification error:', error);
     return NextResponse.redirect(`${origin}/sign-in?error=Invalid or expired invite link`);
   }
+
+  // Store verification status in session
+  await supabase.auth.setSession({
+    access_token: data.session.access_token,
+    refresh_token: data.session.refresh_token
+  });
 
   // Token is valid, redirect to update password
   return NextResponse.redirect(`${origin}/update-password?token=${token}&type=${type}`);

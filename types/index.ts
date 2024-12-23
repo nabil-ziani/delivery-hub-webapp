@@ -4,7 +4,8 @@ export type AuthResponse = {
     error: string;
 } | {
     success: true;
-    message: string;
+    message?: string;
+    redirectTo?: string;
 } | void;
 
 export type OrganizationMember = {

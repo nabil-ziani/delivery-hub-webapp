@@ -43,10 +43,8 @@ export function UpdatePasswordForm() {
                 toast.error(result.error);
             } else {
                 toast.success(result?.message || "Password updated successfully!");
-                if (isInvite) {
-                    router.push("/onboarding");
-                } else {
-                    router.push("/sign-in");
+                if (result?.redirectTo) {
+                    router.push(result.redirectTo);
                 }
             }
         } catch (error) {
