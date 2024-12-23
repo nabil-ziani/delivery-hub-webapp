@@ -99,6 +99,9 @@ export const updatePasswordAction = async (formData: FormData): Promise<AuthResp
     const confirmPassword = formData.get("confirmPassword")?.toString() || "";
     const securityCode = formData.get("securityCode")?.toString();
 
+    console.log('Attempting to verify token:', securityCode);
+    console.log('Token length:', securityCode?.length);
+
     if (!securityCode) {
         return { error: "Security code is required" };
     }
@@ -130,6 +133,7 @@ export const updatePasswordAction = async (formData: FormData): Promise<AuthResp
             });
 
             if (sessionError) {
+                console.log(sessionError)
                 return { error: "Invalid invite link" };
             }
 

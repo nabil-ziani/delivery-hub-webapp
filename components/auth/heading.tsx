@@ -6,9 +6,9 @@ const Heading = ({ title, description }: { title: string, description: string })
                 width={50}
                 height={50}
                 alt="Logo"
-                className="mx-auto"
+                className="mx-auto mb-4"
             />
-            <p className="text-xl font-medium">{title}</p>
+            <p className="text-xl font-medium mb-2">{title}</p>
             <p className="text-small text-default-500">{description}</p>
         </div>
     )

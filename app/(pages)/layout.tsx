@@ -1,7 +1,34 @@
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+
 import NavbarComponent from "@/components/ui/navbar";
 import Sidebar from "@/components/ui/sidebar";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient();
+
+  // Check authentication
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    return redirect("/sign-in");
+  }
+
+  // Check organization profile
+  const { data: member } = await supabase
+    .from('organization_members')
+    .select(`
+      organization:organizations (
+        restaurant_profile:restaurant_profiles (*)
+      )
+    `)
+    .eq('user_id', user.id)
+    .single();
+
+  // Redirect to onboarding if no profile exists
+  if (!member?.organization?.restaurant_profile) {
+    return redirect("/onboarding");
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <NavbarComponent />

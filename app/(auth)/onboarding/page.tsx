@@ -1,16 +1,33 @@
+import { Suspense } from "react";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import OnboardingForm from "@/components/auth/onboarding-form";
+
+import { OnboardingForm } from "@/components/auth/onboarding-form";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Suspense } from "react";
 
 export default async function OnboardingPage() {
     const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
+    // Check authentication
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) {
+        return redirect("/sign-in");
+    }
 
-    if (!user) {
-        return redirect("/sign-in")
+    // Check if onboarding is already completed
+    const { data: member } = await supabase
+        .from('organization_members')
+        .select(`
+            organization:organizations (
+                restaurant_profile:restaurant_profiles (*)
+            )
+        `)
+        .eq('user_id', user.id)
+        .single();
+
+    // Redirect to dashboard if already completed
+    if (member?.organization?.restaurant_profile) {
+        return redirect("/");
     }
 
     return (

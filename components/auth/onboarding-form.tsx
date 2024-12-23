@@ -14,7 +14,7 @@ import { schemas } from "@/lib/validations/auth";
 import { defaultWorkingHours, onboardingSteps } from "@/constants";
 import { User } from "@supabase/supabase-js";
 
-const OnboardingForm = ({ user }: { user: User }) => {
+export const OnboardingForm = ({ user }: { user: User }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [formData, setFormData] = useState({
@@ -272,5 +272,3 @@ const OnboardingForm = ({ user }: { user: User }) => {
         </div>
     )
 }
-
-export default OnboardingForm
