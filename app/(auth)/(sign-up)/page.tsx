@@ -1,12 +1,12 @@
 import { Suspense } from "react"
 
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { ResetPasswordForm } from "@/components/auth/reset-password-form"
+import SignUpForm from "@/components/auth/signup-form"
 
-export default async function ForgotPasswordPage() {
+export default async function SignUpPage() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <ResetPasswordForm />
+      <SignUpForm />
     </Suspense>
   )
 }

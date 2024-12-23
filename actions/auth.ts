@@ -3,66 +3,11 @@
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { SignInSchema, SignUpSchema, ResetPasswordSchema, UpdatePasswordSchema } from "@/lib/validations/auth";
+import { SignInSchema, ResetPasswordSchema, UpdatePasswordSchema, OnboardingSchema } from "@/lib/validations/auth";
 import { AuthResponse } from "@/types";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-
-export const signUpAction = async (formData: FormData): Promise<AuthResponse> => {
-    const email = formData.get("email")?.toString() || "";
-    const password = formData.get("password")?.toString() || "";
-    const confirmPassword = formData.get("confirmPassword")?.toString() || "";
-
-    try {
-        const result = SignUpSchema.safeParse({ email, password, confirmPassword });
-        if (!result.success) {
-            const error = result.error.issues[0];
-            return { error: error.message };
-        }
-
-        const supabase = await createClient();
-
-        // Sign up with Supabase
-        const { data: { user }, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`
-            }
-        });
-
-        if (error) return { error: error.message };
-
-        // Create organization and member
-        if (user) {
-            try {
-                // Create organization
-                const organization = await prisma.organization.create({
-                    data: {
-                        name: "New Restaurant", // This will be updated during onboarding
-                        members: {
-                            create: {
-                                userId: user.id,
-                                role: "owner"
-                            }
-                        }
-                    }
-                });
-            } catch (dbError) {
-                console.error("Failed to create organization:", dbError);
-                // Don't return error to user as they are already signed up
-            }
-        }
-
-        return {
-            success: true,
-            message: "Account created! Please check your email to verify your account."
-        };
-    } catch (error) {
-        return { error: "An unexpected error occurred" };
-    }
-};
 
 export const signInAction = async (formData: FormData): Promise<AuthResponse> => {
     const email = formData.get("email")?.toString() || "";
@@ -93,7 +38,7 @@ export const signInAction = async (formData: FormData): Promise<AuthResponse> =>
     }
 };
 
-export const forgotPasswordAction = async (formData: FormData): Promise<AuthResponse> => {
+export const resetPasswordAction = async (formData: FormData): Promise<AuthResponse> => {
     const email = formData.get("email")?.toString() || "";
 
     try {
@@ -149,7 +94,7 @@ export const forgotPasswordAction = async (formData: FormData): Promise<AuthResp
     }
 };
 
-export const resetPasswordAction = async (formData: FormData): Promise<AuthResponse> => {
+export const updatePasswordAction = async (formData: FormData): Promise<AuthResponse> => {
     const password = formData.get("password")?.toString() || "";
     const confirmPassword = formData.get("confirmPassword")?.toString() || "";
     const securityCode = formData.get("securityCode")?.toString();
@@ -250,3 +195,119 @@ export const signOutAction = async () => {
     await supabase.auth.signOut();
     return redirect("/sign-in");
 };
+
+export const completeOnboardingAction = async (formData: FormData) => {
+    try {
+        const supabase = await createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session?.user) {
+            return { error: "Not authenticated" };
+        }
+
+        // Get form data
+        const data = {
+            restaurantName: formData.get("restaurantName")?.toString() || "",
+            description: formData.get("description")?.toString() || "",
+            phoneNumber: formData.get("phoneNumber")?.toString() || "",
+            email: formData.get("email")?.toString() || "",
+            address: formData.get("address")?.toString() || "",
+            city: formData.get("city")?.toString() || "",
+            postalCode: formData.get("postalCode")?.toString() || "",
+            workingHours: JSON.parse(formData.get("workingHours")?.toString() || "{}"),
+        };
+
+        // Get logo file if present
+        const logo = formData.get("logo") as File | null;
+
+        // Validate input
+        const result = OnboardingSchema.safeParse(data);
+        if (!result.success) {
+            const error = result.error.issues[0];
+            return { error: error.message };
+        }
+
+        // Get the organization for this user
+        const member = await prisma.organizationMember.findFirst({
+            where: {
+                userId: session.user.id,
+            },
+            include: {
+                organization: true,
+            },
+        });
+
+        if (!member) {
+            return { error: "Organization not found" };
+        }
+
+        // Upload logo if present
+        let logoUrl: string | undefined;
+        if (logo) {
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from("restaurant-logos")
+                .upload(`${member.organizationId}/logo`, logo, {
+                    upsert: true,
+                });
+
+            if (uploadError) {
+                console.error("Logo upload error:", uploadError);
+                return { error: "Failed to upload logo" };
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from("restaurant-logos")
+                .getPublicUrl(uploadData.path);
+
+            logoUrl = publicUrl;
+        }
+
+        // Update organization name
+        await prisma.organization.update({
+            where: {
+                id: member.organizationId,
+            },
+            data: {
+                name: data.restaurantName,
+            },
+        });
+
+        // Create or update restaurant profile
+        await prisma.restaurantProfile.upsert({
+            where: {
+                organizationId: member.organizationId,
+            },
+            create: {
+                organizationId: member.organizationId,
+                phoneNumber: data.phoneNumber,
+                email: data.email,
+                address: data.address,
+                city: data.city,
+                postalCode: data.postalCode,
+                settings: {
+                    description: data.description,
+                    logo: logoUrl,
+                    deliveryRadius: 5000, // 5km default
+                    workingHours: data.workingHours,
+                },
+            },
+            update: {
+                phoneNumber: data.phoneNumber,
+                email: data.email,
+                address: data.address,
+                city: data.city,
+                postalCode: data.postalCode,
+                settings: {
+                    description: data.description,
+                    logo: logoUrl,
+                    workingHours: data.workingHours,
+                },
+            },
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Onboarding error:", error);
+        return { error: "Failed to complete onboarding" };
+    }
+}; 

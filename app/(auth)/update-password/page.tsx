@@ -1,14 +1,10 @@
 import { UpdatePasswordForm } from "@/components/auth/update-password-form"
 import { Suspense } from "react"
-import { Spinner } from "@nextui-org/react"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 export default async function UpdatePasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="flex h-screen w-full items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    }>
+    <Suspense fallback={<LoadingSpinner />}>
       <UpdatePasswordForm />
     </Suspense>
   )

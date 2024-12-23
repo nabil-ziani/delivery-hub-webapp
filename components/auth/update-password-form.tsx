@@ -3,7 +3,7 @@
 import React from "react";
 import { Button, Input, Form } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
-import { resetPasswordAction } from "@/actions/auth";
+import { updatePasswordAction } from "@/actions/auth";
 import { useSearchParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Heading from "./heading";
@@ -12,12 +12,13 @@ export function UpdatePasswordForm() {
     const [isVisible, setIsVisible] = React.useState(false);
     const [isConfirmVisible, setIsConfirmVisible] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
+
     const searchParams = useSearchParams();
     const router = useRouter();
 
     const isInvite = searchParams.get('type') === 'invite';
-    const title = isInvite ? "Welcome to Delivery Hub" : "Update Password";
-    const description = isInvite ? "Please set your password to continue" : "Enter your new password";
+    const title = isInvite ? "Hi there 👋" : "Update Password";
+    const description = isInvite ? "Let's set your password to continue" : "Enter your new password";
 
     const toggleVisibility = () => setIsVisible(!isVisible);
     const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible);
@@ -36,7 +37,7 @@ export function UpdatePasswordForm() {
             }
 
             formData.append("securityCode", securityCode);
-            const result = await resetPasswordAction(formData);
+            const result = await updatePasswordAction(formData);
 
             if (result && "error" in result) {
                 toast.error(result.error);
@@ -113,7 +114,7 @@ export function UpdatePasswordForm() {
                         type="submit"
                         isLoading={isLoading}
                     >
-                        {isInvite ? "Complete Setup" : "Update Password"}
+                        {isInvite ? "Set Password" : "Update Password"}
                     </Button>
                 </Form>
             </div>

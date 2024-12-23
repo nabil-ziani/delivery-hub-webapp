@@ -44,3 +44,33 @@ export const stats = [
         changeType: "neutral",
     },
 ];
+
+// ONBOARDING STEPS
+export const onboardingSteps = [
+    {
+        title: "Restaurant",
+        description: "Add your restaurant's basic information",
+    },
+    {
+        title: "Contact",
+        description: "How customers can reach you",
+    },
+    {
+        title: "Location",
+        description: "Where your restaurant is located",
+    },
+    {
+        title: "Opening",
+        description: "When you're open for business",
+    }
+];
+
+export const defaultWorkingHours = {
+    monday: { open: "17:00", close: "22:00" },
+    tuesday: { open: "17:00", close: "22:00" },
+    wednesday: { open: "17:00", close: "22:00" },
+    thursday: { open: "17:00", close: "22:00" },
+    friday: { open: "17:00", close: "23:00" },
+    saturday: { open: "17:00", close: "23:00" },
+    sunday: { open: "17:00", close: "22:00" },
+};

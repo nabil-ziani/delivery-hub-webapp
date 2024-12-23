@@ -1,13 +1,12 @@
 import { createClient } from '@/utils/supabase/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-const PUBLIC_ROUTES = ['/sign-in', '/sign-up', '/reset-password', '/verify', '/update-password'];
+import type { OrganizationMember } from '@/types';
+const PUBLIC_ROUTES = ['/sign-in', '/reset-password', '/verify'];
 
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
-  // Handle Supabase invite URLs
   if (pathname === '/verify' && searchParams.get('type') === 'invite') {
     // Keep all query parameters when redirecting
     return NextResponse.redirect(new URL(`/update-password?${searchParams.toString()}`, request.url));
@@ -29,29 +28,27 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/sign-in', request.url));
     }
 
-    // Check if user has completed onboarding
+    // Check if user has completed onboarding and has a restaurant profile
     const { data: member } = await supabase
       .from('organization_members')
-      .select('role')
+      .select(`
+        role,
+        organization:organizations (
+          restaurant_profile:restaurant_profiles (*)
+        )
+      `)
       .eq('user_id', user.id)
-      .single();
+      .returns<OrganizationMember[]>()
+      .single()
 
-    // Special case for onboarding
     if (pathname === '/onboarding') {
-      if (member) {
-        // User already completed onboarding, redirect to dashboard
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+      if (member?.organization?.restaurant_profile) {
+        // Setup is complete, redirect to root
+        return NextResponse.redirect(new URL('/', request.url));
       }
-    } else if (!member && pathname !== '/onboarding') {
-      // If user hasn't completed onboarding and tries to access any other protected route
+    } else if (!member || !member.organization?.restaurant_profile) {
+      // If setup is incomplete and trying to access any other protected route
       return NextResponse.redirect(new URL('/onboarding', request.url));
-    }
-
-    // Check admin access
-    if (pathname.startsWith('/admin')) {
-      if (!member || member.role !== 'owner') {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-      }
     }
 
     return NextResponse.next();
@@ -62,13 +59,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - logo.png (logo file)
-     */
     '/((?!_next/static|_next/image|favicon.ico|logo.png).*)',
   ],
 };

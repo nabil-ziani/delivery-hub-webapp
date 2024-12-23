@@ -3,7 +3,7 @@
 import React from "react";
 import { Button, Input, Form } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
-import { forgotPasswordAction } from "@/actions/auth";
+import { resetPasswordAction } from "@/actions/auth";
 import toast from "react-hot-toast";
 import Heading from "./heading";
 
@@ -16,7 +16,7 @@ export function ResetPasswordForm() {
 
         try {
             const formData = new FormData(event.currentTarget);
-            const result = await forgotPasswordAction(formData);
+            const result = await resetPasswordAction(formData);
 
             if (result && "error" in result) {
                 toast.error(result.error);

@@ -69,6 +69,18 @@ export const WorkingHoursSchema = z.object({
     message: "Closing time must be after opening time",
 });
 
+// Validation schema for end of onboarding (check for all fields)
+export const OnboardingSchema = z.object({
+    restaurantName: z.string().min(1, "Restaurant name is required"),
+    description: z.string().optional(),
+    phoneNumber: z.string().min(1, "Phone number is required"),
+    email: z.string().email("Invalid email address"),
+    address: z.string().min(1, "Address is required"),
+    city: z.string().min(1, "City is required"),
+    postalCode: z.string().min(1, "Postal code is required"),
+    workingHours: WorkingHoursSchema,
+});
+
 export const schemas = {
     signIn: SignInSchema,
     signUp: SignUpSchema,
