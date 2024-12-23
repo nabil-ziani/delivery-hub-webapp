@@ -1,3 +1,4 @@
+// ***** DASHBOARD *****
 export const navigation = [
     {
         name: "Dashboard",
@@ -45,7 +46,7 @@ export const stats = [
     },
 ];
 
-// ONBOARDING STEPS
+// ***** ONBOARDING *****
 export const onboardingSteps = [
     {
         title: "Restaurant",
