@@ -5,6 +5,9 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { SignInSchema, SignUpSchema, ResetPasswordSchema, UpdatePasswordSchema } from "@/lib/validations/auth";
 import { AuthResponse } from "@/types";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export const signUpAction = async (formData: FormData): Promise<AuthResponse> => {
     const email = formData.get("email")?.toString() || "";
@@ -21,7 +24,7 @@ export const signUpAction = async (formData: FormData): Promise<AuthResponse> =>
         const supabase = await createClient();
 
         // Sign up with Supabase
-        const { error } = await supabase.auth.signUp({
+        const { data: { user }, error } = await supabase.auth.signUp({
             email,
             password,
             options: {
@@ -30,6 +33,27 @@ export const signUpAction = async (formData: FormData): Promise<AuthResponse> =>
         });
 
         if (error) return { error: error.message };
+
+        // Create organization and member
+        if (user) {
+            try {
+                // Create organization
+                const organization = await prisma.organization.create({
+                    data: {
+                        name: "New Restaurant", // This will be updated during onboarding
+                        members: {
+                            create: {
+                                userId: user.id,
+                                role: "owner"
+                            }
+                        }
+                    }
+                });
+            } catch (dbError) {
+                console.error("Failed to create organization:", dbError);
+                // Don't return error to user as they are already signed up
+            }
+        }
 
         return {
             success: true,
@@ -163,6 +187,35 @@ export const resetPasswordAction = async (formData: FormData): Promise<AuthRespo
             if (sessionError) {
                 return { error: "Invalid invite link" };
             }
+
+            // Get the current user after verifying OTP
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (user) {
+                try {
+                    // Check if organization already exists for this user
+                    const existingMember = await prisma.organizationMember.findFirst({
+                        where: { userId: user.id }
+                    });
+
+                    if (!existingMember) {
+                        // Create organization for invited user
+                        await prisma.organization.create({
+                            data: {
+                                name: "New Restaurant", // Will be updated during onboarding
+                                members: {
+                                    create: {
+                                        userId: user.id,
+                                        role: "owner"
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } catch (dbError) {
+                    console.error("Failed to create organization:", dbError);
+                }
+            }
         }
 
         // Now that we have a session (either from invite or existing), update the password
@@ -180,12 +233,12 @@ export const resetPasswordAction = async (formData: FormData): Promise<AuthRespo
                 .from('password_resets')
                 .update({ used_at: new Date().toISOString() })
                 .eq('security_code', securityCode);
+
+            return redirect("/sign-in");
         }
 
-        return {
-            success: true,
-            message: reset ? "Password updated successfully" : "Account setup completed successfully"
-        };
+        // For invite flow, redirect to onboarding
+        return redirect("/onboarding");
     } catch (error) {
         console.error('Reset password error:', error);
         return { error: "An unexpected error occurred" };

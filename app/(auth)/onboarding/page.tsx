@@ -6,38 +6,30 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { completeOnboardingAction } from "@/actions/onboarding";
-import { Icon } from "@iconify/react";
 import { AddressStep } from "@/components/onboarding/address-step";
 import { HoursStep } from "@/components/onboarding/hours-step";
 import { LogoUpload } from "@/components/onboarding/logo-upload";
+import HorizontalSteps from "@/components/onboarding/horizontal-steps";
+import { Icon } from "@iconify/react";
+import { schemas } from "@/lib/validations/auth";
 
-type Step = {
-    title: string;
-    description: string;
-    icon: string;
-};
-
-const steps: Step[] = [
+const steps = [
     {
-        title: "Restaurant Details",
-        description: "Tell us about your restaurant",
-        icon: "solar:shop-2-bold",
+        title: "Restaurant",
+        description: "Add your restaurant's basic information",
     },
     {
-        title: "Contact Information",
-        description: "How can customers reach you",
-        icon: "solar:phone-bold",
+        title: "Contact",
+        description: "How customers can reach you",
     },
     {
         title: "Location",
-        description: "Where are you located",
-        icon: "solar:map-point-bold",
+        description: "Where your restaurant is located",
     },
     {
-        title: "Opening Hours",
-        description: "When are you open",
-        icon: "solar:clock-circle-bold",
-    },
+        title: "Opening",
+        description: "When you're open for business",
+    }
 ];
 
 const defaultWorkingHours = {
@@ -83,8 +75,57 @@ export default function OnboardingPage() {
         checkSession();
     }, [router, supabase.auth]);
 
+    const validateCurrentStep = () => {
+        try {
+            switch (currentStep) {
+                case 0:
+                    schemas.onboarding.restaurantDetails.parse({
+                        restaurantName: formData.restaurantName,
+                        description: formData.description,
+                        logo: formData.logo,
+                    });
+                    break;
+                case 1:
+                    schemas.onboarding.contactInfo.parse({
+                        phoneNumber: formData.phoneNumber,
+                        email: formData.email,
+                    });
+                    break;
+                case 2:
+                    schemas.onboarding.location.parse({
+                        address: formData.address,
+                        city: formData.city,
+                        postalCode: formData.postalCode,
+                    });
+                    break;
+                case 3:
+                    schemas.onboarding.workingHours.parse(formData.workingHours);
+                    break;
+            }
+            return true;
+        } catch (error: any) {
+            if (error.errors?.[0]?.message) {
+                toast.error(error.errors[0].message);
+            }
+            return false;
+        }
+    };
+
+    const nextStep = () => {
+        if (currentStep < steps.length - 1) {
+            if (validateCurrentStep()) {
+                setCurrentStep(prev => prev + 1);
+            }
+        }
+    };
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        if (!validateCurrentStep()) {
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -118,23 +159,11 @@ export default function OnboardingPage() {
         setFormData(prev => ({ ...prev, [key]: value }));
     };
 
-    const nextStep = () => {
-        if (currentStep < steps.length - 1) {
-            setCurrentStep(prev => prev + 1);
-        }
-    };
-
-    const prevStep = () => {
-        if (currentStep > 0) {
-            setCurrentStep(prev => prev - 1);
-        }
-    };
-
     const renderStepContent = () => {
         switch (currentStep) {
             case 0:
                 return (
-                    <>
+                    <div className="space-y-6">
                         <LogoUpload
                             value={formData.logo}
                             onChange={(file) => handleInputChange("logo", file)}
@@ -157,11 +186,11 @@ export default function OnboardingPage() {
                             variant="bordered"
                             isDisabled={isLoading}
                         />
-                    </>
+                    </div>
                 );
             case 1:
                 return (
-                    <>
+                    <div className="space-y-6">
                         <Input
                             isRequired
                             label="Phone Number"
@@ -182,7 +211,7 @@ export default function OnboardingPage() {
                             variant="bordered"
                             isDisabled={true}
                         />
-                    </>
+                    </div>
                 );
             case 2:
                 return (
@@ -205,60 +234,62 @@ export default function OnboardingPage() {
         }
     };
 
+    const prevStep = () => {
+        if (currentStep > 0) {
+            setCurrentStep(prev => prev - 1);
+        }
+    };
+
     if (!user) {
         return null;
     }
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4">
-            <Card className="w-full max-w-xl">
-                <CardHeader className="flex flex-col gap-1 items-center pb-8">
+            <Card className="w-full max-w-[900px] min-h-[850px] flex flex-col">
+                <CardHeader className="flex flex-col gap-6 items-center py-8">
                     <img
                         src="/logo.png"
                         width={50}
                         height={50}
                         alt="Logo"
-                        className="mx-auto mb-4"
+                        className="mx-auto"
                     />
-                    <h1 className="text-xl font-semibold">Complete Your Profile</h1>
-                    <p className="text-small text-default-500">
-                        Just a few more details to get you started
-                    </p>
-                    {/* Stepper */}
-                    <div className="flex w-full justify-between mt-8 relative">
-                        <div className="absolute top-1/2 left-0 w-full h-1 bg-default-100 -translate-y-1/2" />
-                        {steps.map((step, index) => (
-                            <div
-                                key={step.title}
-                                className={`relative flex flex-col items-center gap-2 ${index <= currentStep ? "text-primary" : "text-default-400"
-                                    }`}
-                            >
-                                <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center z-10 
-                                    ${index <= currentStep
-                                            ? "bg-primary text-white"
-                                            : "bg-default-100 text-default-400"
-                                        }`}
-                                >
-                                    <Icon icon={step.icon} className="text-xl" />
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-sm font-medium">{step.title}</p>
-                                    <p className="text-xs text-default-400">{step.description}</p>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="text-center space-y-1.5">
+                        <h1 className="text-2xl font-semibold">Complete Your Profile</h1>
+                        <p className="text-default-500">
+                            Just a few more details to get you started
+                        </p>
                     </div>
+                    <HorizontalSteps
+                        key={currentStep}
+                        defaultStep={currentStep}
+                        steps={steps}
+                        className="w-full max-w-md px-2 sm:px-0"
+                        onStepChange={(step) => {
+                            if (step >= steps.length) return;
+
+                            if (step > currentStep) {
+                                if (!validateCurrentStep()) return;
+                            }
+
+                            setCurrentStep(step);
+                        }}
+                    />
                 </CardHeader>
-                <CardBody>
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                        {renderStepContent()}
-                        <div className="flex gap-3 mt-4">
+                <CardBody className="px-4 sm:px-8 pb-8 flex-grow flex flex-col">
+                    <form onSubmit={handleSubmit} className="flex flex-col flex-grow">
+                        <div className="flex-grow">
+                            {renderStepContent()}
+                        </div>
+
+                        <div className="flex gap-3 justify-end mt-8 pt-4 border-t border-divider">
                             {currentStep > 0 && (
                                 <Button
                                     variant="flat"
                                     onPress={prevStep}
                                     isDisabled={isLoading}
+                                    startContent={<Icon icon="solar:arrow-left-line-duotone" />}
                                 >
                                     Previous
                                 </Button>
@@ -268,6 +299,7 @@ export default function OnboardingPage() {
                                     color="primary"
                                     onPress={nextStep}
                                     isDisabled={isLoading}
+                                    endContent={<Icon icon="solar:arrow-right-line-duotone" />}
                                 >
                                     Next
                                 </Button>
@@ -276,6 +308,7 @@ export default function OnboardingPage() {
                                     type="submit"
                                     color="primary"
                                     isLoading={isLoading}
+                                    endContent={!isLoading && <Icon icon="solar:check-circle-bold" />}
                                 >
                                     Complete Setup
                                 </Button>
