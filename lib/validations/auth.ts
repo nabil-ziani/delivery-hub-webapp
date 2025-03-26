@@ -45,7 +45,7 @@ export const LocationSchema = z.object({
     city: z.string().min(1, "City is required"),
     postalCode: z.string()
         .min(1, "Postal code is required")
-        .regex(/^[0-9]{4}(\s?[A-Z]{2})?$/, "Invalid postal code format (e.g. 2600 or 1234 AB)"),
+        .regex(/^[0-9]{4}$/, "Invalid postal code format (e.g. 1000, 2000, 3000)"),
 });
 
 const TimeSchema = z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)");

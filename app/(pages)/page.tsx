@@ -1,6 +1,3 @@
-import { DeliveryMap } from '@/components/map/delivery-map';
-import { createClient } from '@/utils/supabase/client';
-import { redirect } from 'next/navigation';
 import {
   Card,
   CardBody,

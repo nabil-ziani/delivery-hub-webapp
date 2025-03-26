@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Button, Card, CardBody, CardHeader, Input } from "@nextui-org/react";
+import { useState, useEffect } from "react";
+import { Button, Card, CardBody, Input, Image } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { completeOnboardingAction } from "@/actions/auth";
@@ -12,7 +12,6 @@ import { Icon } from "@iconify/react";
 import { schemas } from "@/lib/validations/auth";
 import { defaultWorkingHours, onboardingSteps } from "@/constants";
 import { User } from "@supabase/supabase-js";
-import RowSteps from "../onboarding/row-steps";
 
 export const OnboardingForm = ({ user }: { user: User }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -198,76 +197,94 @@ export const OnboardingForm = ({ user }: { user: User }) => {
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center p-4">
-            <Card className="w-full max-w-[900px] min-h-[850px] flex flex-col">
-                <CardHeader className="flex flex-col gap-6 items-center py-8">
-                    <img
-                        src="/logo.png"
-                        width={50}
-                        height={50}
-                        alt="Logo"
-                        className="mx-auto"
-                    />
-                    <div className="text-center space-y-1.5">
-                        <h1 className="text-2xl font-semibold">Complete Your Profile</h1>
-                        <p className="text-default-500">
-                            Just a few more details to get you started
-                        </p>
-                    </div>
-                    <RowSteps
-                        key={currentStep}
-                        defaultStep={currentStep}
-                        steps={onboardingSteps}
-                        onStepChange={(step) => {
-                            if (step >= onboardingSteps.length) return;
-
-                            if (step > currentStep) {
-                                if (!validateCurrentStep()) return;
-                            }
-
-                            setCurrentStep(step);
-                        }}
-                    />
-                </CardHeader>
-                <CardBody className="px-4 sm:px-8 pb-8 flex-grow flex flex-col">
-                    <form onSubmit={handleSubmit} className="flex flex-col flex-grow">
-                        <div className="flex-grow">
-                            {renderStepContent()}
+            <Card className="w-full max-w-[1200px] min-h-[600px]">
+                <CardBody className="flex flex-col md:flex-row gap-8 p-0">
+                    {/* Left side - Form */}
+                    <div className="flex-1 flex flex-col p-8">
+                        <div className="flex flex-col items-center text-center mb-8">
+                            <img
+                                src="/logo.png"
+                                width={50}
+                                height={50}
+                                alt="Logo"
+                                className="mb-4"
+                            />
+                            <h1 className="text-2xl font-semibold">Complete Your Profile</h1>
+                            <p className="text-default-500 mt-1.5">
+                                Step {currentStep + 1} of {onboardingSteps.length}
+                            </p>
+                            <p className="text-default-400 text-sm mb-4">
+                                {onboardingSteps[currentStep].description}
+                            </p>
                         </div>
 
-                        <div className="flex gap-3 justify-end mt-8 pt-4 border-t border-divider">
-                            {currentStep > 0 && (
+                        <form onSubmit={handleSubmit} className="flex flex-col flex-grow">
+                            <div className="flex-grow">
+                                {renderStepContent()}
+                            </div>
+
+                            <div className="flex gap-3 justify-between mt-8 pt-4 border-t border-divider">
                                 <Button
+                                    type="button"
                                     variant="flat"
                                     onPress={prevStep}
-                                    isDisabled={isLoading}
+                                    isDisabled={isLoading || currentStep === 0}
                                     startContent={<Icon icon="solar:arrow-left-line-duotone" />}
                                 >
                                     Previous
                                 </Button>
-                            )}
-                            {currentStep < onboardingSteps.length - 1 ? (
-                                <Button
-                                    color="primary"
-                                    onPress={nextStep}
-                                    isDisabled={isLoading}
-                                    endContent={<Icon icon="solar:arrow-right-line-duotone" />}
-                                >
-                                    Next
-                                </Button>
-                            ) : (
-                                <Button
-                                    type="submit"
-                                    color="primary"
-                                    isLoading={isLoading}
-                                    endContent={!isLoading && <Icon icon="solar:check-circle-bold" />}
-                                >
-                                    Complete Setup
-                                </Button>
-                            )}
+                                {currentStep < onboardingSteps.length - 1 ? (
+                                    <Button
+                                        type="button"
+                                        color="primary"
+                                        onPress={nextStep}
+                                        isDisabled={isLoading}
+                                        endContent={<Icon icon="solar:arrow-right-line-duotone" />}
+                                    >
+                                        Next
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        type="submit"
+                                        color="primary"
+                                        isLoading={isLoading}
+                                        endContent={!isLoading && <Icon icon="solar:check-circle-bold" />}
+                                    >
+                                        Complete Setup
+                                    </Button>
+                                )}
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* Right side - Illustration */}
+                    <div className="hidden md:flex flex-1 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/10 dark:to-primary-900/20">
+                        <div className="relative w-full h-full flex items-center justify-center p-8">
+                            <Image
+                                src={getStepImage(currentStep)}
+                                alt={onboardingSteps[currentStep].title}
+                                className="max-w-[400px] w-full h-auto object-contain"
+                            />
                         </div>
-                    </form>
+                    </div>
                 </CardBody>
             </Card>
         </div>
-    )
+    );
+}
+
+// Helper function to get the appropriate image for each step
+function getStepImage(step: number): string {
+    switch (step) {
+        case 0:
+            return "/images/onboarding/restaurant-info.svg";
+        case 1:
+            return "/images/onboarding/contact-info.svg";
+        case 2:
+            return "/images/onboarding/location.svg";
+        case 3:
+            return "/images/onboarding/working-hours.svg";
+        default:
+            return "/images/onboarding/restaurant-info.svg";
+    }
 }

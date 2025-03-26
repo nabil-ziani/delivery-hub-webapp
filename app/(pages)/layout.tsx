@@ -33,6 +33,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     .single();
 
   console.log('Member data:', member);
+
   // Redirect to onboarding if no profile exists
   if (!member?.organization?.restaurant_profile) {
     console.log("Redirecting back to onboarding");
