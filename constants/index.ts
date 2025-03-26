@@ -67,11 +67,11 @@ export const onboardingSteps = [
 ];
 
 export const defaultWorkingHours = {
-    monday: { open: "17:00", close: "22:00" },
-    tuesday: { open: "17:00", close: "22:00" },
-    wednesday: { open: "17:00", close: "22:00" },
-    thursday: { open: "17:00", close: "22:00" },
-    friday: { open: "17:00", close: "23:00" },
-    saturday: { open: "17:00", close: "23:00" },
-    sunday: { open: "17:00", close: "22:00" },
+    monday: { isOpen: true, open: "17:00", close: "22:00" },
+    tuesday: { isOpen: true, open: "17:00", close: "22:00" },
+    wednesday: { isOpen: true, open: "17:00", close: "22:00" },
+    thursday: { isOpen: true, open: "17:00", close: "22:00" },
+    friday: { isOpen: true, open: "17:00", close: "23:00" },
+    saturday: { isOpen: true, open: "17:00", close: "23:00" },
+    sunday: { isOpen: true, open: "17:00", close: "22:00" },
 };

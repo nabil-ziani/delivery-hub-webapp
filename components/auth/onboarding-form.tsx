@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button, Card, CardBody, Input, Image } from "@nextui-org/react";
+import { Button, Card, CardBody, Input, Image } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { completeOnboardingAction } from "@/actions/auth";

@@ -10,7 +10,7 @@ import {
     DropdownTrigger,
     DropdownMenu,
     DropdownItem,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { signOutAction } from "@/actions/auth";
 
 const NavbarComponent = () => {

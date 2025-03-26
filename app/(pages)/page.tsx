@@ -3,7 +3,7 @@ import {
   CardBody,
   CardHeader,
   Divider,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { stats } from '@/constants';
 

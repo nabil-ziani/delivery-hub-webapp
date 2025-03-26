@@ -2,7 +2,7 @@
 
 import { navigation } from '@/constants';
 import { Icon } from '@iconify/react';
-import { Link } from '@nextui-org/react';
+import { Link } from "@heroui/react";
 import { usePathname } from "next/navigation";
 
 const Sidebar = () => {

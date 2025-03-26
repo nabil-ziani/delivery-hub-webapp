@@ -1,4 +1,4 @@
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import "./globals.css";
 
 import { poppins } from "@/app/fonts"
@@ -16,10 +16,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="en" suppressHydrationWarning className={poppins.variable}>
             <body className="dark bg-background text-foreground font-poppins antialiased">
-                <NextUIProvider>
+                <HeroUIProvider>
                     <ToastProvider />
                     {children}
-                </NextUIProvider>
+                </HeroUIProvider>
             </body>
         </html >
     );

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, Input, Checkbox, Link, Form } from "@nextui-org/react";
+import { Button, Input, Checkbox, Link, Form } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { signInAction } from "@/actions/auth";
 import { useRouter } from "next/navigation";
