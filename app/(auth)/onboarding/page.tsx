@@ -21,7 +21,7 @@ export default async function OnboardingPage() {
         .select('*')
 
     console.log('Member error:', memberError);
-    // console.log('User data:', user);
+    console.log('User data:', user);
     console.log('Member data:', data);
 
     // Redirect to dashboard if already completed

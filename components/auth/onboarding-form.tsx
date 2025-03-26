@@ -158,6 +158,11 @@ export const OnboardingForm = ({ user }: { user: User }) => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        // Only proceed with submission if we're on the last step
+        if (currentStep !== onboardingSteps.length - 1) {
+            return;
+        }
+
         if (!validateCurrentStep()) {
             return;
         }

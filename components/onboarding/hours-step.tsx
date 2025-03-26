@@ -1,23 +1,12 @@
 "use client";
 
-import { Button, Card, CardBody, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Select, SelectItem, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Switch } from "@heroui/react";
+import { Button, Card, CardBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Switch } from "@heroui/react";
 import { useState } from "react";
 import { Icon } from "@iconify/react";
+import { DAYS } from "@/constants";
+import { TimeSelectionModal } from "./time-selection-modal";
 
-const DAYS = [
-    { key: "monday", label: "Monday" },
-    { key: "tuesday", label: "Tuesday" },
-    { key: "wednesday", label: "Wednesday" },
-    { key: "thursday", label: "Thursday" },
-    { key: "friday", label: "Friday" },
-    { key: "saturday", label: "Saturday" },
-    { key: "sunday", label: "Sunday" },
-] as const;
-
-const HOURS = Array.from({ length: 24 }, (_, i) => {
-    const hour = i.toString().padStart(2, "0");
-    return { value: `${hour}:00`, label: `${hour}:00` };
-});
+type DayKey = typeof DAYS[number]["key"];
 
 type DaySchedule = {
     isOpen: boolean;
@@ -26,7 +15,7 @@ type DaySchedule = {
 };
 
 type WorkingHours = {
-    [key in typeof DAYS[number]["key"]]: DaySchedule;
+    [key in DayKey]: DaySchedule;
 };
 
 type HoursStepProps = {
@@ -35,100 +24,110 @@ type HoursStepProps = {
     isLoading: boolean;
 };
 
-export function HoursStep({ value, onChange, isLoading }: HoursStepProps) {
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const [selectedDay, setSelectedDay] = useState<typeof DAYS[number]["key"]>("monday");
-    const [tempSchedule, setTempSchedule] = useState<DaySchedule>(value[selectedDay]);
+type QuickSetupType = "all" | "weekdays" | "weekend";
 
-    const handleDayClick = (day: typeof DAYS[number]["key"]) => {
+export function HoursStep({ value, onChange, isLoading }: HoursStepProps) {
+    const [selectedDay, setSelectedDay] = useState<DayKey>("monday");
+    const [quickSetupType, setQuickSetupType] = useState<QuickSetupType | null>(null);
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const handleDayClick = (day: DayKey) => {
+        if (!value[day].isOpen) return;
         setSelectedDay(day);
-        setTempSchedule(value[day]);
+        setQuickSetupType(null);
         onOpen();
     };
 
-    const handleTimeChange = (type: "open" | "close", time: string) => {
-        setTempSchedule(prev => ({
-            ...prev,
-            [type]: time,
-        }));
+    const handleToggleDay = (day: DayKey, isOpen: boolean) => {
+        const newHours = { ...value };
+        newHours[day] = { ...newHours[day], isOpen };
+        onChange(newHours);
     };
 
-    const handleToggleDay = () => {
-        setTempSchedule(prev => ({
-            ...prev,
-            isOpen: !prev.isOpen,
-        }));
+    const handleTimeChange = (type: "open" | "close", time: string) => {
+        const newHours = { ...value };
+        newHours[selectedDay] = { ...newHours[selectedDay], [type]: time };
+        onChange(newHours);
+    };
+
+    const handleQuickSetup = (type: QuickSetupType) => {
+        setQuickSetupType(type);
+        setSelectedDay("monday"); // Default day for preview
+        onOpen();
     };
 
     const handleSave = () => {
-        onChange({
-            ...value,
-            [selectedDay]: tempSchedule,
+        if (!quickSetupType) {
+            onClose();
+            return;
+        }
+
+        const newHours = { ...value };
+        const daysToUpdate = quickSetupType === "all"
+            ? DAYS.map(d => d.key)
+            : quickSetupType === "weekdays"
+                ? DAYS.map(d => d.key).filter(d => d !== "saturday" && d !== "sunday")
+                : ["saturday", "sunday"];
+
+        daysToUpdate.forEach((key) => {
+            newHours[key as DayKey] = {
+                ...value[selectedDay],
+                isOpen: true
+            };
         });
+
+        onChange(newHours);
         onClose();
     };
 
-    const copySchedule = (schedule: DaySchedule, days: typeof DAYS[number]["key"][]) => {
-        const newHours = { ...value };
-        days.forEach((key) => {
-            newHours[key] = { ...schedule };
-        });
-        onChange(newHours);
+    const getModalTitle = () => {
+        if (!quickSetupType) {
+            return `${DAYS.find(d => d.key === selectedDay)?.label} Hours`;
+        }
+        return quickSetupType === "all"
+            ? "Set Hours for All Days"
+            : quickSetupType === "weekdays"
+                ? "Set Hours for Weekdays"
+                : "Set Hours for Weekend";
     };
 
     return (
         <div className="space-y-6">
-            {/* Header with actions */}
             <div className="flex items-center justify-between">
                 <h3 className="text-xl font-medium">Opening Hours</h3>
                 <Dropdown>
                     <DropdownTrigger>
-                        <Button
-                            variant="flat"
-                            startContent={<Icon icon="solar:copy-bold" />}
-                        >
-                            Quick Actions
+                        <Button variant="flat" startContent={<Icon icon="solar:copy-bold" />}>
+                            Quick Setup
                         </Button>
                     </DropdownTrigger>
-                    <DropdownMenu aria-label="Quick actions">
-                        <DropdownItem
-                            key="all"
-                            description="Apply current schedule to all days"
-                            onPress={() => copySchedule(value[selectedDay], DAYS.map(d => d.key))}
-                        >
+                    <DropdownMenu aria-label="Quick setup options">
+                        <DropdownItem key="all" description="Set hours for all days at once" onPress={() => handleQuickSetup("all")}>
                             Set for all days
                         </DropdownItem>
-                        <DropdownItem
-                            key="weekdays"
-                            description="Apply current schedule to Monday-Friday"
-                            onPress={() => copySchedule(value[selectedDay], DAYS.map(d => d.key).filter(d => d !== "saturday" && d !== "sunday"))}
-                        >
+                        <DropdownItem key="weekdays" description="Set hours for Monday-Friday" onPress={() => handleQuickSetup("weekdays")}>
                             Set for weekdays
                         </DropdownItem>
-                        <DropdownItem
-                            key="weekend"
-                            description="Apply current schedule to Saturday-Sunday"
-                            onPress={() => copySchedule(value[selectedDay], ["saturday", "sunday"])}
-                        >
+                        <DropdownItem key="weekend" description="Set hours for Saturday-Sunday" onPress={() => handleQuickSetup("weekend")}>
                             Set for weekend
                         </DropdownItem>
                     </DropdownMenu>
                 </Dropdown>
             </div>
 
-            {/* Days overview */}
             <div className="w-full flex flex-col gap-2">
                 {DAYS.map(({ key, label }) => (
-                    <Card
-                        key={key}
-                        isPressable
-                        onPress={() => handleDayClick(key)}
-                        className="border border-divider hover:border-primary transition-colors"
-                    >
+                    <Card key={key} isPressable={value[key].isOpen} onPress={() => handleDayClick(key)} className={`border border-divider ${value[key].isOpen ? 'hover:border-primary transition-colors' : ''}`}>
                         <CardBody className="p-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-2.5 h-2.5 rounded-full ${value[key].isOpen ? 'bg-success' : 'bg-danger'}`} />
+                                    <Switch
+                                        size="sm"
+                                        color="success"
+                                        isSelected={value[key].isOpen}
+                                        onValueChange={(isOpen) => handleToggleDay(key, isOpen)}
+                                        isDisabled={isLoading}
+                                    />
                                     <span className="text-lg">{label}</span>
                                 </div>
                                 {value[key].isOpen ? (
@@ -150,74 +149,16 @@ export function HoursStep({ value, onChange, isLoading }: HoursStepProps) {
                 ))}
             </div>
 
-            {/* Edit Modal */}
-            <Modal isOpen={isOpen} onClose={onClose} size="sm">
-                <ModalContent>
-                    {(onClose) => (
-                        <>
-                            <ModalHeader>
-                                <h3 className="text-xl">
-                                    {DAYS.find(d => d.key === selectedDay)?.label}
-                                </h3>
-                            </ModalHeader>
-                            <ModalBody>
-                                <div className="space-y-8">
-                                    <Switch
-                                        size="lg"
-                                        isSelected={tempSchedule.isOpen}
-                                        onValueChange={handleToggleDay}
-                                        isDisabled={isLoading}
-                                        classNames={{
-                                            wrapper: "mx-auto"
-                                        }}
-                                    >
-                                        {tempSchedule.isOpen ? "Open" : "Closed"}
-                                    </Switch>
-
-                                    {tempSchedule.isOpen && (
-                                        <div className="space-y-4">
-                                            <Select
-                                                label="Opening Time"
-                                                selectedKeys={[tempSchedule.open]}
-                                                onChange={(e) => handleTimeChange("open", e.target.value)}
-                                                variant="bordered"
-                                                isDisabled={isLoading}
-                                            >
-                                                {HOURS.map((hour) => (
-                                                    <SelectItem key={hour.value} textValue={hour.value}>
-                                                        {hour.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
-                                            <Select
-                                                label="Closing Time"
-                                                selectedKeys={[tempSchedule.close]}
-                                                onChange={(e) => handleTimeChange("close", e.target.value)}
-                                                variant="bordered"
-                                                isDisabled={isLoading}
-                                            >
-                                                {HOURS.map((hour) => (
-                                                    <SelectItem key={hour.value} textValue={hour.value}>
-                                                        {hour.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
-                                        </div>
-                                    )}
-                                </div>
-                            </ModalBody>
-                            <ModalFooter>
-                                <Button variant="light" onPress={onClose}>
-                                    Cancel
-                                </Button>
-                                <Button color="primary" onPress={handleSave}>
-                                    Save
-                                </Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
-            </Modal>
+            {/* Single Time Selection Modal for both use cases */}
+            <TimeSelectionModal
+                isOpen={isOpen}
+                onClose={onClose}
+                selectedDay={selectedDay}
+                value={quickSetupType ? { [selectedDay]: value[selectedDay] } : value}
+                handleTimeChange={handleTimeChange}
+                title={getModalTitle()}
+                onSave={quickSetupType ? handleSave : undefined}
+            />
         </div>
     );
 } 
