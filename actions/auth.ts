@@ -305,7 +305,7 @@ export const completeOnboardingAction = async (formData: FormData) => {
             },
         });
 
-        return { success: true };
+        return { success: true, redirectTo: "/" };
     } catch (error) {
         console.error("Onboarding error:", error);
         return { error: "Failed to complete onboarding" };

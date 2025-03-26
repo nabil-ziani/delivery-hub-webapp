@@ -17,8 +17,8 @@ export function UpdatePasswordForm() {
     const router = useRouter();
 
     const isInvite = searchParams.get('type') === 'invite';
-    const title = isInvite ? "Hi there 👋" : "Update Password";
-    const description = isInvite ? "Let's set your password to continue" : "Enter your new password";
+    const title = isInvite ? "Welcome to Delivery Hub!👋" : "Update Password";
+    const description = isInvite ? "Let's get you started by setting your password" : "Enter your new password";
 
     const toggleVisibility = () => setIsVisible(!isVisible);
     const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible);

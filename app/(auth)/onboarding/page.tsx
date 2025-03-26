@@ -15,18 +15,17 @@ export default async function OnboardingPage() {
     }
 
     // Check if onboarding is already completed
-    const { data: member } = await supabase
+    console.log('User ID:', user.id);
+    const { data, error: memberError } = await supabase
         .from('organization_members')
-        .select(`
-            organization:organizations (
-                restaurant_profile:restaurant_profiles (*)
-            )
-        `)
-        .eq('user_id', user.id)
-        .single();
+        .select('*')
+
+    console.log('Member error:', memberError);
+    // console.log('User data:', user);
+    console.log('Member data:', data);
 
     // Redirect to dashboard if already completed
-    if (member?.organization?.restaurant_profile) {
+    if (data?.organization?.restaurant_profile) {
         return redirect("/");
     }
 

@@ -18,14 +18,24 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     .from('organization_members')
     .select(`
       organization:organizations (
-        restaurant_profile:restaurant_profiles (*)
+        restaurant_profile:restaurant_profiles (
+          id,
+          phone_number,
+          email,
+          address,
+          city,
+          postal_code,
+          settings
+        )
       )
     `)
     .eq('user_id', user.id)
     .single();
 
+  console.log('Member data:', member);
   // Redirect to onboarding if no profile exists
   if (!member?.organization?.restaurant_profile) {
+    console.log("Redirecting back to onboarding");
     return redirect("/onboarding");
   }
 

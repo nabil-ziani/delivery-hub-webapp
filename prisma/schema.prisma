@@ -1,104 +1,89 @@
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["multiSchema"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-    schemas  = ["public", "auth"]
-}
-
-model Profile {
-    id        String   @id
-    email     String?
-    role      String
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
-
-    @@map("profiles")
-    @@schema("public")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["public"]
 }
 
 model Organization {
-    id        String   @id @default(uuid())
-    name      String
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
+  id                String               @id @default(uuid())
+  name              String
+  createdAt         DateTime             @default(now()) @map("created_at")
+  updatedAt         DateTime             @updatedAt @map("updated_at")
+  members           OrganizationMember[]
+  restaurantProfile RestaurantProfile?
+  InviteToken       InviteToken[]
 
-    members           OrganizationMember[]
-    restaurantProfile RestaurantProfile?
-    InviteToken       InviteToken[]
-
-    @@map("organizations")
-    @@schema("public")
+  @@map("organizations")
+  @@schema("public")
 }
 
 model OrganizationMember {
-    id             String     @id @default(uuid())
-    organizationId String     @map("organization_id")
-    userId         String     @map("user_id")
-    role           MemberRole
-    createdAt      DateTime   @default(now()) @map("created_at")
-    updatedAt      DateTime   @updatedAt @map("updated_at")
+  id             String       @id @default(uuid())
+  organizationId String       @map("organization_id")
+  userId         String       @map("user_id") @db.Uuid
+  role           MemberRole
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-    organization Organization @relation(fields: [organizationId], references: [id])
-
-    @@unique([organizationId, userId])
-    @@map("organization_members")
-    @@schema("public")
+  @@unique([organizationId, userId])
+  @@map("organization_members")
+  @@schema("public")
 }
 
 model RestaurantProfile {
-    id             String   @id @default(uuid())
-    organizationId String   @unique @map("organization_id")
-    phoneNumber    String   @map("phone_number")
-    email          String
-    address        String
-    city           String
-    postalCode     String   @map("postal_code")
-    latitude       Float?
-    longitude      Float?
-    settings       Json?
-    createdAt      DateTime @default(now()) @map("created_at")
-    updatedAt      DateTime @updatedAt @map("updated_at")
+  id             String       @id @default(uuid())
+  organizationId String       @unique @map("organization_id")
+  phoneNumber    String       @map("phone_number")
+  email          String
+  address        String
+  city           String
+  postalCode     String       @map("postal_code")
+  latitude       Float?
+  longitude      Float?
+  settings       Json?
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-    organization Organization @relation(fields: [organizationId], references: [id])
-
-    @@map("restaurant_profiles")
-    @@schema("public")
+  @@map("restaurant_profiles")
+  @@schema("public")
 }
 
 model InviteToken {
-    id             String     @id @default(uuid())
-    organizationId String     @map("organization_id")
-    email          String
-    role           MemberRole
-    expiresAt      DateTime   @map("expires_at")
-    createdAt      DateTime   @default(now()) @map("created_at")
-    updatedAt      DateTime   @updatedAt @map("updated_at")
+  id             String       @id @default(uuid())
+  organizationId String       @map("organization_id")
+  email          String
+  role           MemberRole
+  expiresAt      DateTime     @map("expires_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-    organization Organization @relation(fields: [organizationId], references: [id])
-
-    @@map("invite_tokens")
-    @@schema("public")
+  @@map("invite_tokens")
+  @@schema("public")
 }
 
 model PasswordReset {
-    id        String   @id @default(uuid())
-    email     String
-    token     String   @unique
-    expiresAt DateTime @map("expires_at")
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-    @@map("password_resets")
-    @@schema("public")
+  @@map("password_resets")
+  @@schema("public")
 }
 
 enum MemberRole {
-    owner
-    courier
+  owner
+  courier
 
-    @@schema("public")
+  @@schema("public")
 }

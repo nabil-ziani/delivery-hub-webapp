@@ -8,11 +8,11 @@ import { completeOnboardingAction } from "@/actions/auth";
 import { AddressStep } from "@/components/onboarding/address-step";
 import { HoursStep } from "@/components/onboarding/hours-step";
 import { LogoUpload } from "@/components/onboarding/logo-upload";
-import HorizontalSteps from "@/components/onboarding/horizontal-steps";
 import { Icon } from "@iconify/react";
 import { schemas } from "@/lib/validations/auth";
 import { defaultWorkingHours, onboardingSteps } from "@/constants";
 import { User } from "@supabase/supabase-js";
+import RowSteps from "../onboarding/row-steps";
 
 export const OnboardingForm = ({ user }: { user: User }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,6 @@ export const OnboardingForm = ({ user }: { user: User }) => {
                             label="Restaurant Name"
                             value={formData.restaurantName}
                             onChange={(e) => handleInputChange("restaurantName", e.target.value)}
-                            placeholder="Enter your restaurant's name"
                             variant="bordered"
                             isDisabled={isLoading}
                         />
@@ -54,7 +53,6 @@ export const OnboardingForm = ({ user }: { user: User }) => {
                             label="Description"
                             value={formData.description}
                             onChange={(e) => handleInputChange("description", e.target.value)}
-                            placeholder="Tell us about your restaurant"
                             variant="bordered"
                             isDisabled={isLoading}
                         />
@@ -68,7 +66,6 @@ export const OnboardingForm = ({ user }: { user: User }) => {
                             label="Phone Number"
                             value={formData.phoneNumber}
                             onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                            placeholder="Enter your phone number"
                             type="tel"
                             variant="bordered"
                             isDisabled={isLoading}
@@ -78,7 +75,6 @@ export const OnboardingForm = ({ user }: { user: User }) => {
                             label="Email"
                             value={formData.email}
                             onChange={(e) => handleInputChange("email", e.target.value)}
-                            placeholder="Enter your email"
                             type="email"
                             variant="bordered"
                             isDisabled={true}
@@ -187,7 +183,11 @@ export const OnboardingForm = ({ user }: { user: User }) => {
                 toast.error(result.error);
             } else {
                 toast.success("Onboarding completed successfully!");
-                router.push("/");
+                if (result?.redirectTo) {
+                    setTimeout(() => {
+                        router.push(result.redirectTo);
+                    }, 1000);
+                }
             }
         } catch (error) {
             toast.error("An error occurred while completing onboarding");
@@ -197,7 +197,7 @@ export const OnboardingForm = ({ user }: { user: User }) => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="min-h-screen w-full flex items-center justify-center p-4">
             <Card className="w-full max-w-[900px] min-h-[850px] flex flex-col">
                 <CardHeader className="flex flex-col gap-6 items-center py-8">
                     <img
@@ -213,11 +213,10 @@ export const OnboardingForm = ({ user }: { user: User }) => {
                             Just a few more details to get you started
                         </p>
                     </div>
-                    <HorizontalSteps
+                    <RowSteps
                         key={currentStep}
                         defaultStep={currentStep}
                         steps={onboardingSteps}
-                        className="w-full max-w-md px-2 sm:px-0"
                         onStepChange={(step) => {
                             if (step >= onboardingSteps.length) return;
 

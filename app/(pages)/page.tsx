@@ -11,13 +11,6 @@ import { Icon } from "@iconify/react";
 import { stats } from '@/constants';
 
 export default async function HomePage() {
-  const supabase = createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return redirect("/sign-in");
-  }
 
   return (
     <div className="space-y-6">
