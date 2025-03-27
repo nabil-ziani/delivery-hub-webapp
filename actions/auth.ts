@@ -69,12 +69,13 @@ export const resetPasswordAction = async (formData: FormData): Promise<AuthRespo
         const securityCode = Math.random().toString(36).slice(-6).toUpperCase();
 
         // Store the security code with an expiration
-        await supabase.from('password_resets')
-            .insert({
-                user_id: user.user_id,
-                security_code: securityCode,
-                expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes
-            });
+        await prisma.passwordReset.create({
+            data: {
+                email,
+                token: securityCode,
+                expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+            }
+        });
 
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${origin}/api/auth/callback?redirect_to=/reset-password&code=${securityCode}`,
@@ -99,9 +100,6 @@ export const updatePasswordAction = async (formData: FormData): Promise<AuthResp
     const confirmPassword = formData.get("confirmPassword")?.toString() || "";
     const securityCode = formData.get("securityCode")?.toString();
 
-    console.log('Attempting to verify token:', securityCode);
-    console.log('Token length:', securityCode?.length);
-
     if (!securityCode) {
         return { error: "Security code is required" };
     }
@@ -116,68 +114,63 @@ export const updatePasswordAction = async (formData: FormData): Promise<AuthResp
         const supabase = await createClient();
 
         // First try to verify if this is a password reset
-        const { data: reset } = await supabase
-            .from('password_resets')
-            .select('*')
-            .eq('security_code', securityCode)
-            .is('used_at', null)
-            .gt('expires_at', new Date().toISOString())
-            .single();
+        const resetToken = await prisma.passwordReset.findFirst({
+            where: {
+                token: securityCode,
+                expiresAt: {
+                    gt: new Date()
+                }
+            }
+        });
 
         // Handle invite token first to establish session
-        if (!reset) {
-            // For invite flow, get the existing session
-            const { data: { session } } = await supabase.auth.getSession();
+        if (!resetToken) {
+            // Get authenticated user directly from Supabase Auth server
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-            if (!session) {
+            if (userError || !user) {
                 return { error: "Invalid or expired invite link" };
             }
 
-            // Get the current user from the session
-            const { data: { user } } = await supabase.auth.getUser();
+            try {
+                // Check if organization already exists for this user
+                const existingMember = await prisma.organizationMember.findFirst({
+                    where: { userId: user.id }
+                });
 
-            if (user) {
-                try {
-                    // Check if organization already exists for this user
-                    const existingMember = await prisma.organizationMember.findFirst({
-                        where: { userId: user.id }
-                    });
-
-                    if (!existingMember) {
-                        // Create organization for invited user
-                        await prisma.organization.create({
-                            data: {
-                                name: "New Restaurant", // Will be updated during onboarding
-                                members: {
-                                    create: {
-                                        userId: user.id,
-                                        role: "owner"
-                                    }
+                if (!existingMember) {
+                    // Create organization for invited user
+                    await prisma.organization.create({
+                        data: {
+                            name: "New Restaurant", // Will be updated during onboarding
+                            members: {
+                                create: {
+                                    userId: user.id,
+                                    role: "owner"
                                 }
                             }
-                        });
-                    }
-                } catch (dbError) {
-                    console.error("Failed to create organization:", dbError);
+                        }
+                    });
                 }
+            } catch (dbError) {
+                console.error("Failed to create organization:", dbError);
             }
         }
 
         // Now that we have a session (either from invite or existing), update the password
         const { error: updateError } = await supabase.auth.updateUser({
-            password: password,
+            password: password
         });
 
         if (updateError) {
             return { error: "Password update failed" };
         }
 
-        // If it was a password reset, mark the code as used
-        if (reset) {
-            await supabase
-                .from('password_resets')
-                .update({ used_at: new Date().toISOString() })
-                .eq('security_code', securityCode);
+        // If it was a password reset, delete the token
+        if (resetToken) {
+            await prisma.passwordReset.delete({
+                where: { token: securityCode }
+            });
 
             return { success: true, redirectTo: "/sign-in" };
         }
@@ -230,7 +223,7 @@ export const completeOnboardingAction = async (formData: FormData) => {
         // Get the organization for this user
         const member = await prisma.organizationMember.findFirst({
             where: {
-                userId: session.user.id,
+                userId: user.id,
             },
             include: {
                 organization: true,

@@ -7,7 +7,7 @@ import Sidebar from "@/components/ui/sidebar";
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
 
-  // Check authentication
+  // Check authentication using getUser for better security
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
     return redirect("/sign-in");

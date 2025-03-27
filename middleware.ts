@@ -10,7 +10,18 @@ export async function middleware(request: NextRequest) {
   });
 
   const supabase = createClient(request);
-  await supabase.auth.getSession();
+
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    const isProtectedRoute = !request.nextUrl.pathname.startsWith('/sign-in') &&
+      !request.nextUrl.pathname.startsWith('/reset-password') &&
+      !request.nextUrl.pathname.startsWith('/api/auth');
+
+    if (isProtectedRoute) {
+      return NextResponse.redirect(new URL('/sign-in', request.url));
+    }
+  }
 
   return response;
 }
