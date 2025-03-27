@@ -1,4 +1,5 @@
 import { RestaurantProfile } from "@prisma/client";
+import type { SVGProps } from "react";
 
 export type AuthResponse = {
     error: string;
@@ -14,3 +15,7 @@ export type OrganizationMember = {
         restaurant_profile: RestaurantProfile;
     };
 }
+
+export type IconSvgProps = SVGProps<SVGSVGElement> & {
+    size?: number;
+};

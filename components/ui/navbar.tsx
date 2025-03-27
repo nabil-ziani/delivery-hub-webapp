@@ -81,7 +81,7 @@ const NavbarComponent = () => {
                         <DropdownMenu aria-label="Profile Actions" variant="flat">
                             <DropdownItem key="profile" className="h-14 gap-2">
                                 <p className="font-semibold">Ingelogd als</p>
-                                <p className="font-semibold text-default-500">restaurant@deliveryhub.nl</p>
+                                <p className="font-semibold text-default-500">admin</p>
                             </DropdownItem>
                             <DropdownItem key="restaurant_settings">
                                 <div className="flex items-center gap-2">

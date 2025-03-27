@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardBody, CardHeader, Button, Chip } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { Order } from '@/types/order';
+import { Order } from '@/lib/types/order';
 
 interface FloatingOrdersPanelProps {
     orders: Order[];
@@ -34,7 +34,7 @@ export function FloatingOrdersPanel({ orders, onOrderClick }: FloatingOrdersPane
         return (
             <Button
                 className="fixed right-4 top-20 z-50"
-                color="primary"
+                color="secondary"
                 size="lg"
                 isIconOnly
                 onPress={() => setIsCollapsed(false)}

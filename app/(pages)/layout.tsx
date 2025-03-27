@@ -2,7 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
 import NavbarComponent from "@/components/ui/navbar";
-import Sidebar from "@/components/ui/sidebar";
+import CustomSidebar from "@/components/ui/custom-sidebar";
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -48,7 +48,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen bg-background">
       <NavbarComponent />
-      <Sidebar />
+      <CustomSidebar />
       <main className="min-h-[calc(100vh-64px)]">
         {children}
       </main>
