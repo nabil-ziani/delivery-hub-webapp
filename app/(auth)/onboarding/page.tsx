@@ -15,18 +15,27 @@ export default async function OnboardingPage() {
     }
 
     // Check if onboarding is already completed
-    console.log('User ID:', user.id);
-    const { data, error: memberError } = await supabase
+    const { data: memberData, error: memberError } = await supabase
         .from('organization_members')
-        .select('*')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .single();
 
-    console.log('Member error:', memberError);
-    console.log('User data:', user);
-    console.log('Member data:', data);
+    if (memberError) {
+        console.error('Error fetching member data:', memberError);
+        return redirect("/sign-in");
+    }
 
-    // Redirect to dashboard if already completed
-    if (data?.organization?.restaurant_profile) {
-        return redirect("/");
+    if (memberData?.organization_id) {
+        const { data: profileData } = await supabase
+            .from('restaurant_profiles')
+            .select('id')
+            .eq('organization_id', memberData.organization_id)
+            .single();
+
+        if (profileData?.id) {
+            return redirect("/");
+        }
     }
 
     return (

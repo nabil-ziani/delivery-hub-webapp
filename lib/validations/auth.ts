@@ -54,15 +54,6 @@ const DayScheduleSchema = z.object({
     isOpen: z.boolean(),
     open: TimeSchema,
     close: TimeSchema,
-}).refine((data) => {
-    // Only validate times if the day is open
-    if (!data.isOpen) return true;
-
-    const [openHour, openMinute] = data.open.split(':').map(Number);
-    const [closeHour, closeMinute] = data.close.split(':').map(Number);
-    return (closeHour > openHour) || (closeHour === openHour && closeMinute > openMinute);
-}, {
-    message: "Closing time must be after opening time",
 });
 
 export const WorkingHoursSchema = z.object({

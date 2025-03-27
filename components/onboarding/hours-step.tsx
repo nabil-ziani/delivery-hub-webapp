@@ -29,6 +29,7 @@ type QuickSetupType = "all" | "weekdays" | "weekend";
 export function HoursStep({ value, onChange, isLoading }: HoursStepProps) {
     const [selectedDay, setSelectedDay] = useState<DayKey>("monday");
     const [quickSetupType, setQuickSetupType] = useState<QuickSetupType | null>(null);
+
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const handleDayClick = (day: DayKey) => {
@@ -149,7 +150,6 @@ export function HoursStep({ value, onChange, isLoading }: HoursStepProps) {
                 ))}
             </div>
 
-            {/* Single Time Selection Modal for both use cases */}
             <TimeSelectionModal
                 isOpen={isOpen}
                 onClose={onClose}

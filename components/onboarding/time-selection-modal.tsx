@@ -13,15 +13,7 @@ interface TimeSelectionModalProps {
     onSave?: () => void;
 }
 
-export const TimeSelectionModal = ({
-    isOpen,
-    onClose,
-    selectedDay,
-    value,
-    handleTimeChange,
-    title,
-    onSave,
-}: TimeSelectionModalProps) => {
+export const TimeSelectionModal = ({ isOpen, onClose, selectedDay, value, handleTimeChange, title, onSave }: TimeSelectionModalProps) => {
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="sm">
             <ModalContent>
@@ -64,13 +56,15 @@ export const TimeSelectionModal = ({
                             </div>
                         </ModalBody>
                         <ModalFooter>
-                            <Button variant="light" onPress={onClose}>
-                                Cancel
-                            </Button>
                             {onSave && (
-                                <Button color="primary" onPress={onSave}>
-                                    Apply
-                                </Button>
+                                <>
+                                    <Button variant="light" onPress={onClose}>
+                                        Cancel
+                                    </Button>
+                                    <Button color="primary" onPress={onSave}>
+                                        Apply
+                                    </Button>
+                                </>
                             )}
                         </ModalFooter>
                     </>

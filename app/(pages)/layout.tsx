@@ -8,35 +8,40 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   const supabase = await createClient();
 
   // Check authentication
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) {
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
     return redirect("/sign-in");
   }
 
-  // Check organization profile
-  const { data: member } = await supabase
+  // First check if user has an organization
+  const { data: memberData, error: memberError } = await supabase
     .from('organization_members')
-    .select(`
-      organization:organizations (
-        restaurant_profile:restaurant_profiles (
-          id,
-          phone_number,
-          email,
-          address,
-          city,
-          postal_code,
-          settings
-        )
-      )
-    `)
+    .select('organization_id')
     .eq('user_id', user.id)
     .single();
 
-  console.log('Member data:', member);
+  if (memberError) {
+    console.error('Error fetching organization:', memberError);
+    return redirect("/sign-in");
+  }
 
-  // Redirect to onboarding if no profile exists
-  if (!member?.organization?.restaurant_profile) {
-    console.log("Redirecting back to onboarding");
+  if (!memberData?.organization_id) {
+    return redirect("/onboarding");
+  }
+
+  // Then check if organization has a restaurant profile
+  const { data: profileData, error: profileError } = await supabase
+    .from('restaurant_profiles')
+    .select('id')
+    .eq('organization_id', memberData.organization_id)
+    .single();
+
+  if (profileError && profileError.code !== 'PGRST116') { // Ignore not found error
+    console.error('Error fetching profile:', profileError);
+    return redirect("/sign-in");
+  }
+
+  if (!profileData?.id) {
     return redirect("/onboarding");
   }
 
