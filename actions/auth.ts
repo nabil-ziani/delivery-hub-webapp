@@ -142,7 +142,7 @@ export const updatePasswordAction = async (formData: FormData): Promise<AuthResp
                     // Create organization for invited user
                     await prisma.organization.create({
                         data: {
-                            name: "New Restaurant", // Will be updated during onboarding
+                            name: "New Restaurant",
                             members: {
                                 create: {
                                     userId: user.id,
