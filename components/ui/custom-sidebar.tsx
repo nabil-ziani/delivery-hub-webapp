@@ -5,6 +5,7 @@ import { Button, Spacer, useDisclosure, Tooltip, Card } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMediaQuery } from "usehooks-ts";
 import { cn } from "@heroui/react";
+import { useSidebarStore } from "@/store/sidebar";
 
 import SidebarDrawer from "./sidebar-drawer";
 import sidebarItems from "./sidebar-items";
@@ -13,38 +14,32 @@ import Sidebar from "./sidebar";
 import Image from "next/image";
 
 export default function Component() {
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [isCollapsed, setIsCollapsed] = React.useState(false);
-
+    const { isOpen, onOpenChange } = useDisclosure();
+    const { isExpanded, toggle } = useSidebarStore();
     const isMobile = useMediaQuery("(max-width: 768px)");
-
-    const onToggle = React.useCallback(() => {
-        setIsCollapsed((prev) => !prev);
-    }, []);
-
 
     const pathname = usePathname();
     const currentPath = pathname.split("/")?.[1]
 
     return (
-        <Card className="bg-secondary-foreground fixed left-4 top-20 h-[calc(100vh-6rem)] z-50 shadow-xl">
+        <Card className="h-[calc(100vh-2rem)] bg-default-100 transition-[width] duration-300">
             <SidebarDrawer
-                className={cn("min-w-[288px] rounded-lg", { "min-w-[76px]": isCollapsed })}
+                className={cn("min-w-[288px] rounded-lg", { "min-w-[76px]": !isExpanded })}
                 hideCloseButton={false}
                 isOpen={isOpen}
                 onOpenChange={onOpenChange}
             >
                 <div
                     className={cn(
-                        "will-change relative flex h-full w-72 flex-col bg-default-100 p-6 transition-width ",
+                        "will-change relative flex h-full w-72 flex-col bg-default-100 p-6 transition-[width] duration-300",
                         {
-                            "w-[83px] items-center px-[6px] py-6": isCollapsed,
+                            "w-[83px] items-center px-[6px] py-6": !isExpanded,
                         },
                     )}
                 >
                     <div
                         className={cn("flex items-center gap-3 pl-2", {
-                            "justify-center gap-0 pl-0": isCollapsed,
+                            "justify-center gap-0 pl-0": !isExpanded,
                         })}
                     >
                         <Image
@@ -56,17 +51,17 @@ export default function Component() {
                         />
                         <span
                             className={cn("w-full text-small font-bold uppercase opacity-100", {
-                                "w-0 opacity-0": isCollapsed,
+                                "w-0 opacity-0": !isExpanded,
                             })}
                         >
                             Delivery Hive
                         </span>
-                        <div className={cn("flex-end flex", { hidden: isCollapsed })}>
+                        <div className={cn("flex-end flex", { hidden: !isExpanded })}>
                             <Icon
                                 className="cursor-pointer [&>g]:stroke-[1px]"
                                 icon="solar:round-alt-arrow-left-line-duotone"
                                 width={24}
-                                onClick={isMobile ? onOpenChange : onToggle}
+                                onClick={isMobile ? onOpenChange : toggle}
                             />
                         </div>
                     </div>
@@ -77,7 +72,7 @@ export default function Component() {
                         defaultSelectedKey=""
                         selectedKeys={[currentPath]}
                         iconClassName="group-data-[selected=true]:text-default-50"
-                        isCompact={isCollapsed}
+                        isCompact={!isExpanded}
                         itemClasses={{
                             base: "px-3 mb-2 rounded-large data-[selected=true]:!bg-foreground",
                             title: "group-data-[selected=true]:text-default-50",
@@ -89,50 +84,50 @@ export default function Component() {
 
                     <div
                         className={cn("mt-auto flex flex-col", {
-                            "items-center": isCollapsed,
+                            "items-center": !isExpanded,
                         })}
                     >
-                        {isCollapsed && (
+                        {!isExpanded && (
                             <Button
                                 isIconOnly
                                 className="flex h-10 w-10 text-default-600"
                                 size="sm"
                                 variant="light"
+                                onPress={toggle}
                             >
                                 <Icon
                                     className="cursor-pointer [&>g]:stroke-[1px]"
                                     height={24}
                                     icon="solar:round-alt-arrow-right-line-duotone"
                                     width={24}
-                                    onClick={onToggle}
                                 />
                             </Button>
                         )}
-                        <Tooltip content="Support" isDisabled={!isCollapsed} placement="right">
+                        <Tooltip content="Support" isDisabled={isExpanded} placement="right">
                             <Button
                                 fullWidth
                                 className={cn(
                                     "justify-start truncate text-default-600 data-[hover=true]:text-foreground",
                                     {
-                                        "justify-center": isCollapsed,
+                                        "justify-center": !isExpanded,
                                     },
                                 )}
-                                isIconOnly={isCollapsed}
+                                isIconOnly={!isExpanded}
                                 startContent={
-                                    isCollapsed ? null : (
+                                    !isExpanded ? null : (
                                         <Icon
                                             className="flex-none text-default-600"
-                                            icon="solar:info-circle-line-duotone"
+                                            icon="solar:info-circle-bold-duotone"
                                             width={24}
                                         />
                                     )
                                 }
                                 variant="light"
                             >
-                                {isCollapsed ? (
+                                {!isExpanded ? (
                                     <Icon
                                         className="text-default-500"
-                                        icon="solar:info-circle-line-duotone"
+                                        icon="solar:info-circle-bold-duotone"
                                         width={24}
                                     />
                                 ) : (
@@ -140,27 +135,27 @@ export default function Component() {
                                 )}
                             </Button>
                         </Tooltip>
-                        <Tooltip content="Log Out" isDisabled={!isCollapsed} placement="right">
+                        <Tooltip content="Log Out" isDisabled={isExpanded} placement="right">
                             <Button
                                 className={cn("justify-start text-default-500 data-[hover=true]:text-foreground", {
-                                    "justify-center": isCollapsed,
+                                    "justify-center": !isExpanded,
                                 })}
-                                isIconOnly={isCollapsed}
+                                isIconOnly={!isExpanded}
                                 startContent={
-                                    isCollapsed ? null : (
+                                    !isExpanded ? null : (
                                         <Icon
-                                            className="flex-none rotate-180 text-default-500"
-                                            icon="solar:minus-circle-line-duotone"
+                                            className="flex-none text-default-500"
+                                            icon="solar:logout-2-bold-duotone"
                                             width={24}
                                         />
                                     )
                                 }
                                 variant="light"
                             >
-                                {isCollapsed ? (
+                                {!isExpanded ? (
                                     <Icon
-                                        className="rotate-180 text-default-500"
-                                        icon="solar:minus-circle-line-duotone"
+                                        className="text-default-500"
+                                        icon="solar:logout-2-bold-duotone"
                                         width={24}
                                     />
                                 ) : (

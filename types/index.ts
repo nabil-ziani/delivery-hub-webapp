@@ -1,5 +1,6 @@
 import { RestaurantProfile } from "@prisma/client";
 import type { SVGProps } from "react";
+import { Database } from "./database.types";
 
 export type AuthResponse = {
     error: string;

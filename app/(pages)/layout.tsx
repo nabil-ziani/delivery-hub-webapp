@@ -47,9 +47,11 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 
   return (
     <div className="min-h-screen bg-background">
+      <div className="fixed left-4 top-4 z-50">
+        <CustomSidebar />
+      </div>
       <NavbarComponent />
-      <CustomSidebar />
-      <main className="min-h-[calc(100vh-64px)]">
+      <main className="w-full h-screen">
         {children}
       </main>
     </div>

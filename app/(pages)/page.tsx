@@ -85,7 +85,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="h-[calc(100vh-64px)]">
+    <div className="h-[100vh]">
       <DeliveryMap
         className="w-full h-full"
         zoom={13}

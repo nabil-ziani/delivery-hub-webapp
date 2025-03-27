@@ -2,7 +2,6 @@
 
 import {
     Navbar,
-    NavbarBrand,
     NavbarContent,
     NavbarItem,
     Avatar,
@@ -11,112 +10,117 @@ import {
     DropdownMenu,
     DropdownItem,
     Button,
-    Badge,
+    Card,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { signOutAction } from "@/actions/auth";
-import Image from "next/image";
+import { useState } from "react";
+import { useSidebarStore } from "@/store/sidebar";
 
 const NavbarComponent = () => {
+    const [theme, setTheme] = useState('light');
+
+    const isExpanded = useSidebarStore((state) => state.isExpanded);
+
+    const toggleTheme = () => {
+        setTheme(theme === 'light' ? 'dark' : 'light');
+    };
+
     return (
-        <Navbar
-            isBordered
-            className="bg-background/70 backdrop-blur-md border-b border-divider"
-            maxWidth="full"
+        <Card
+            className={`fixed top-4 z-50 shadow-xl bg-default-100 transition-all duration-300 ${isExpanded ? 'left-[calc(20rem)]' : 'left-[calc(7rem)]'
+                } right-4`}
         >
-            <NavbarBrand>
-                <Image
-                    src="/logo.png"
-                    alt="Delivery Hub"
-                    width={32}
-                    height={32}
-                    className="mr-2"
-                />
-                <p className="font-bold text-inherit">DELIVERY HUB</p>
-            </NavbarBrand>
-
-            <NavbarContent justify="center">
-                <NavbarItem>
-                    <Badge content="5" color="danger">
+            <Navbar maxWidth="full" className="bg-default-100">
+                <NavbarContent justify="end">
+                    <NavbarItem>
                         <Button
-                            variant="light"
-                            startContent={<Icon icon="solar:bell-bold" className="text-xl" />}
+                            isIconOnly
+                            variant="flat"
+                            onPress={toggleTheme}
+                            className="text-default-500 mx-1"
                         >
-                            Meldingen
-                        </Button>
-                    </Badge>
-                </NavbarItem>
-                <NavbarItem>
-                    <Button
-                        variant="light"
-                        startContent={<Icon icon="solar:chart-bold" className="text-xl" />}
-                    >
-                        Statistieken
-                    </Button>
-                </NavbarItem>
-            </NavbarContent>
-
-            <NavbarContent justify="end">
-                <NavbarItem>
-                    <Button
-                        color="primary"
-                        variant="flat"
-                        startContent={<Icon icon="solar:settings-bold" className="text-xl" />}
-                    >
-                        Instellingen
-                    </Button>
-                </NavbarItem>
-                <NavbarItem>
-                    <Dropdown placement="bottom-end">
-                        <DropdownTrigger>
-                            <Avatar
-                                isBordered
-                                as="button"
-                                className="transition-transform"
-                                color="primary"
-                                size="sm"
-                                src="https://i.pravatar.cc/150"
+                            <Icon
+                                icon={theme === 'light'
+                                    ? "solar:moon-stars-bold-duotone"
+                                    : "solar:sun-bold-duotone"
+                                }
+                                className={`text-xl ${theme === 'light' ? 'text-primary' : 'text-warning'}`}
                             />
-                        </DropdownTrigger>
-                        <DropdownMenu aria-label="Profile Actions" variant="flat">
-                            <DropdownItem key="profile" className="h-14 gap-2">
-                                <p className="font-semibold">Ingelogd als</p>
-                                <p className="font-semibold text-default-500">admin</p>
-                            </DropdownItem>
-                            <DropdownItem key="restaurant_settings">
-                                <div className="flex items-center gap-2">
-                                    <Icon icon="solar:shop-2-bold" />
+                        </Button>
+                    </NavbarItem>
+                    <NavbarItem>
+                        <Dropdown placement="bottom-end">
+                            <DropdownTrigger>
+                                <Avatar
+                                    isBordered
+                                    as="button"
+                                    className="transition-transform"
+                                    color="primary"
+                                    size="sm"
+                                    src="https://i.pravatar.cc/150"
+                                />
+                            </DropdownTrigger>
+                            <DropdownMenu aria-label="Profile Actions" variant="faded">
+                                <DropdownItem
+                                    key="restaurant_settings"
+                                    description="Beheer je restaurant instellingen"
+                                    startContent={
+                                        <Icon
+                                            icon="solar:shop-2-bold-duotone"
+                                            className="text-xl text-primary flex-shrink-0"
+                                        />
+                                    }
+                                >
                                     Restaurant Instellingen
-                                </div>
-                            </DropdownItem>
-                            <DropdownItem key="account_settings">
-                                <div className="flex items-center gap-2">
-                                    <Icon icon="solar:user-id-bold" />
+                                </DropdownItem>
+                                <DropdownItem
+                                    key="account_settings"
+                                    description="Beheer je account gegevens"
+                                    startContent={
+                                        <Icon
+                                            icon="solar:user-id-bold-duotone"
+                                            className="text-xl text-primary flex-shrink-0"
+                                        />
+                                    }
+                                >
                                     Account Instellingen
-                                </div>
-                            </DropdownItem>
-                            <DropdownItem key="help">
-                                <div className="flex items-center gap-2">
-                                    <Icon icon="solar:question-circle-bold" />
+                                </DropdownItem>
+                                <DropdownItem
+                                    key="help"
+                                    showDivider
+                                    description="Hulp nodig? Wij staan voor je klaar"
+                                    startContent={
+                                        <Icon
+                                            icon="solar:question-circle-bold-duotone"
+                                            className="text-xl text-primary flex-shrink-0"
+                                        />
+                                    }
+                                >
                                     Help & Support
-                                </div>
-                            </DropdownItem>
-                            <DropdownItem
-                                key="logout"
-                                color="danger"
-                                onPress={() => signOutAction()}
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Icon icon="solar:logout-2-bold" />
+                                </DropdownItem>
+                                <DropdownItem
+                                    key="logout"
+                                    className="text-danger"
+                                    color="danger"
+                                    description="Veilig uitloggen uit je account"
+                                    startContent={
+                                        <Icon
+                                            icon="solar:logout-2-bold-duotone"
+                                            className="text-xl text-danger flex-shrink-0"
+                                        />
+                                    }
+                                    onPress={() => signOutAction()}
+                                >
                                     Uitloggen
-                                </div>
-                            </DropdownItem>
-                        </DropdownMenu>
-                    </Dropdown>
-                </NavbarItem>
-            </NavbarContent>
-        </Navbar>
-    )
-}
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                    </NavbarItem>
+                </NavbarContent>
+            </Navbar>
+        </Card>
+    );
+};
 
-export default NavbarComponent
+export default NavbarComponent;

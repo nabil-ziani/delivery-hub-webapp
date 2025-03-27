@@ -10,13 +10,13 @@ const items: SidebarItem[] = [
     {
         key: "",
         href: "/",
-        icon: "solar:home-2-bold",
+        icon: "solar:home-2-bold-duotone",
         title: "Home",
     },
     {
         key: "orders",
         href: "/orders",
-        icon: "solar:box-bold",
+        icon: "solar:box-bold-duotone",
         title: "Orders",
         endContent: (
             <Chip
@@ -34,7 +34,7 @@ const items: SidebarItem[] = [
     {
         key: "couriers",
         href: "/couriers",
-        icon: "solar:delivery-bold",
+        icon: "solar:delivery-bold-duotone",
         title: "Couriers",
         // endContent: (
         //     <Icon className="text-default-500" icon="solar:add-circle-line-duotone" width={24} />
@@ -43,25 +43,25 @@ const items: SidebarItem[] = [
     {
         key: "integrations",
         href: "/integrations",
-        icon: "solar:plug-circle-bold",
+        icon: "solar:plug-circle-bold-duotone",
         title: "Integrations",
     },
     {
         key: "analyses",
         href: "/analyses",
-        icon: "solar:chart-2-bold",
+        icon: "solar:chart-2-bold-duotone",
         title: "Analyses",
     },
     {
         key: "reviews",
         href: "/reviews",
-        icon: "solar:star-bold",
+        icon: "solar:star-bold-duotone",
         title: "Reviews",
     },
     {
         key: "marketing",
         href: "/marketing",
-        icon: "solar:phone-bold",
+        icon: "solar:phone-bold-duotone",
         title: "Marketing",
     }
 ];
