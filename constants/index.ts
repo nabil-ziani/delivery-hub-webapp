@@ -2,24 +2,44 @@
 export const navigation = [
     {
         name: "Dashboard",
-        href: "/dashboard",
-        icon: "solar:home-2-bold",
+        href: "/",
+        icon: "solar:home-2-bold"
     },
     {
-        name: "Orders",
+        name: "Bestellingen",
         href: "/orders",
-        icon: "solar:box-bold",
+        icon: "solar:box-bold"
+    },
+    {
+        name: "Bezorgers",
+        href: "/couriers",
+        icon: "solar:delivery-bold"
     },
     {
         name: "Menu",
         href: "/menu",
-        icon: "solar:menu-dots-bold",
+        icon: "solar:menu-dots-bold"
     },
     {
-        name: "Settings",
-        href: "/settings",
-        icon: "solar:settings-bold",
+        name: "Integraties",
+        href: "/integrations",
+        icon: "solar:plug-circle-bold"
     },
+    {
+        name: "Analyses",
+        href: "/analytics",
+        icon: "solar:chart-2-bold"
+    },
+    {
+        name: "Reviews",
+        href: "/reviews",
+        icon: "solar:star-bold"
+    },
+    {
+        name: "Marketing",
+        href: "/marketing",
+        icon: "solar:megaphone-bold"
+    }
 ];
 
 export const stats = [

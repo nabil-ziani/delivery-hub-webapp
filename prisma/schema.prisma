@@ -87,3 +87,60 @@ enum MemberRole {
 
   @@schema("public")
 }
+
+model Delivery {
+  id                      String      @id @default(uuid())
+  external_id             String      @unique // ID from external platform (Takeaway, UberEats, etc)
+  platform                String // 'TAKEAWAY', 'UBEREATS', 'DELIVEROO'
+  restaurant_id           String
+  status                  String // 'PENDING', 'ASSIGNED', 'PICKED_UP', 'DELIVERED', 'CANCELLED'
+  customer_name           String
+  customer_phone          String
+  address                 String
+  lat                     Float?
+  lng                     Float?
+  items                   Json // Array of order items
+  total                   Float
+  courier_id              String? // Optional until assigned
+  estimated_delivery_time String?
+  raw_data                Json // Complete raw order data from platform
+  created_at              DateTime    @default(now())
+  updated_at              DateTime    @updatedAt
+  User                    User?       @relation(fields: [userId], references: [id])
+  userId                  String?
+  Restaurant              Restaurant? @relation(fields: [restaurantId], references: [id])
+  restaurantId            String?
+
+  @@index([platform, status])
+  @@index([restaurant_id])
+  @@map("deliveries")
+  @@schema("public")
+}
+
+model User {
+  id         String      @id @default(cuid())
+  email      String      @unique
+  name       String?
+  role       String // "OWNER", "COURIER", "ADMIN"
+  deliveries Delivery[]
+  restaurant Restaurant?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@schema("public")
+}
+
+model Restaurant {
+  id         String                                @id @default(cuid())
+  name       String
+  address    String
+  location   Unsupported("geography(Point, 4326)")
+  ownerId    String                                @unique
+  owner      User                                  @relation(fields: [ownerId], references: [id])
+  deliveries Delivery[]
+  createdAt  DateTime                              @default(now())
+  updatedAt  DateTime                              @updatedAt
+
+  @@index([location], name: "restaurant_location_idx", type: Gist)
+  @@schema("public")
+}
