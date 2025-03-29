@@ -9,6 +9,125 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      couriers: {
+        Row: {
+          created_at: string
+          id: string
+          last_location_lat: number | null
+          last_location_lng: number | null
+          last_location_updated_at: string | null
+          restaurant_id: string
+          status: Database["public"]["Enums"]["CourierStatus"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_location_lat?: number | null
+          last_location_lng?: number | null
+          last_location_updated_at?: string | null
+          restaurant_id: string
+          status?: Database["public"]["Enums"]["CourierStatus"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_location_lat?: number | null
+          last_location_lng?: number | null
+          last_location_updated_at?: string | null
+          restaurant_id?: string
+          status?: Database["public"]["Enums"]["CourierStatus"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "couriers_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deliveries: {
+        Row: {
+          address: string
+          courier_id: string | null
+          created_at: string
+          customer_name: string
+          customer_phone: string | null
+          estimated_delivery_time: string | null
+          external_id: string
+          id: string
+          items: Json | null
+          lat: number | null
+          lng: number | null
+          platform: Database["public"]["Enums"]["DeliveryPlatform"]
+          raw_data: Json | null
+          restaurant_id: string
+          status: Database["public"]["Enums"]["DeliveryStatus"]
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          courier_id?: string | null
+          created_at?: string
+          customer_name: string
+          customer_phone?: string | null
+          estimated_delivery_time?: string | null
+          external_id: string
+          id?: string
+          items?: Json | null
+          lat?: number | null
+          lng?: number | null
+          platform: Database["public"]["Enums"]["DeliveryPlatform"]
+          raw_data?: Json | null
+          restaurant_id: string
+          status?: Database["public"]["Enums"]["DeliveryStatus"]
+          total: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          courier_id?: string | null
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string | null
+          estimated_delivery_time?: string | null
+          external_id?: string
+          id?: string
+          items?: Json | null
+          lat?: number | null
+          lng?: number | null
+          platform?: Database["public"]["Enums"]["DeliveryPlatform"]
+          raw_data?: Json | null
+          restaurant_id?: string
+          status?: Database["public"]["Enums"]["DeliveryStatus"]
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliveries_courier_id_fkey"
+            columns: ["courier_id"]
+            isOneToOne: false
+            referencedRelation: "couriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliveries_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invite_tokens: {
         Row: {
           created_at: string
@@ -191,6 +310,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      CourierStatus: "ONLINE" | "OFFLINE" | "BUSY"
+      DeliveryPlatform: "TAKEAWAY" | "UBEREATS" | "DELIVEROO"
+      DeliveryStatus:
+        | "PENDING"
+        | "ASSIGNED"
+        | "PICKED_UP"
+        | "DELIVERED"
+        | "CANCELLED"
       MemberRole: "owner" | "courier"
     }
     CompositeTypes: {

@@ -46,13 +46,15 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-foreground">
       <div className="fixed left-4 top-4 z-50">
         <CustomSidebar />
       </div>
       <NavbarComponent />
-      <main className="w-full h-screen">
-        {children}
+      <main className="pt-24 pl-[calc(7rem+1rem)] pr-4 transition-all duration-300">
+        <div className="w-full">
+          {children}
+        </div>
       </main>
     </div>
   );

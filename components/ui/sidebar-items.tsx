@@ -1,7 +1,7 @@
 import { Chip } from "@heroui/react";
 import { Icon } from "@iconify/react";
 
-import { type SidebarItem } from "./sidebar";
+import { type SidebarItem, SidebarItemType } from "./sidebar";
 
 /**
  * Please check the https://heroui.com/docs/guide/routing to have a seamless router integration
@@ -36,33 +36,29 @@ const items: SidebarItem[] = [
         href: "/couriers",
         icon: "solar:delivery-bold-duotone",
         title: "Couriers",
-        // endContent: (
-        //     <Icon className="text-default-500" icon="solar:add-circle-line-duotone" width={24} />
-        // ),
     },
     {
         key: "integrations",
-        href: "/integrations",
+        type: SidebarItemType.Nest,
         icon: "solar:plug-circle-bold-duotone",
         title: "Integrations",
-    },
-    {
-        key: "analyses",
-        href: "/analyses",
-        icon: "solar:chart-2-bold-duotone",
-        title: "Analyses",
-    },
-    {
-        key: "reviews",
-        href: "/reviews",
-        icon: "solar:star-bold-duotone",
-        title: "Reviews",
-    },
-    {
-        key: "marketing",
-        href: "/marketing",
-        icon: "solar:phone-bold-duotone",
-        title: "Marketing",
+        items: [
+            {
+                key: "integrations-takeaway",
+                href: "/integrations/takeaway",
+                title: "Takeaway.com",
+            },
+            {
+                key: "integrations-ubereats",
+                href: "/integrations/ubereats",
+                title: "Uber Eats",
+            },
+            {
+                key: "integrations-deliveroo",
+                href: "/integrations/deliveroo",
+                title: "Deliveroo",
+            }
+        ]
     }
 ];
 
